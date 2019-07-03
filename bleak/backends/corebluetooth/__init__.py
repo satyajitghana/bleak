@@ -10,6 +10,7 @@ Created on 2017-11-19 by hbldh <henrik.blidh@nedomkull.com>
 import asyncio
 from Foundation import NSDate, NSDefaultRunLoopMode, NSRunLoop
 from .CentralManagerDelegate import CentralManagerDelegate
+from .PeripheralManagerDelegate import PeripheralManagerDelegate
 
 # async def discover(device="hci0", timeout=5.0):
     # raise NotImplementedError("CoreBluetooth discover not implemented yet.")
@@ -23,14 +24,15 @@ class Application():
     ns_run_loop_done = False
     ns_run_loop_interval = 0.001
 
-    def __init__(self):
+    def __init__(self, client: bool = True):
         self.main_loop = asyncio.get_event_loop()
         self.main_loop.create_task(self._handle_nsrunloop())
-        self.main_loop.create_task(self._central_manager_delegate_ready())
+        self.main_loop.create_task(self._is_delegate_ready())
 
         self.nsrunloop = NSRunLoop.currentRunLoop()
         
-        self.central_manager_delegate = CentralManagerDelegate.alloc().init()
+        self.central_manager_delegate = CentralManagerDelegate.alloc().init() if client else None
+        self.peripheral_manager_delegate = PeripheralManagerDelegate.alloc.init() if not client else None
 
     def __del__(self):
         self.ns_run_loop_done = True
@@ -41,9 +43,8 @@ class Application():
             self.nsrunloop.runMode_beforeDate_(NSDefaultRunLoopMode, time_interval)
             await asyncio.sleep(0)
 
-    async def _central_manager_delegate_ready(self):
-        await self.central_manager_delegate.is_ready()
-
-# Restructure this later: Global isn't the prettiest way of doing this...
-global CBAPP 
-CBAPP = Application()
+    async def _is_delegate_ready(self):
+        if self.central_manager_delegate is not None:
+            await self.central_manager_delegate.is_ready()
+        else:
+            await self.peripheral_manager_delegate.is_ready()
