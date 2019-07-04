@@ -79,6 +79,7 @@ class BleakClientCoreBluetooth(BaseBleakClient):
 
     async def scan_for_devices(self, timeout: float = 10.0) -> [BLEDevice]:
         """Scan for peripheral devices"""
+        await self.is_ready()
         peripherals = await self.app.central_manager_delegate.scanForPeripherals_(scan_options={'timeout': timeout}) 
 
         found = []
