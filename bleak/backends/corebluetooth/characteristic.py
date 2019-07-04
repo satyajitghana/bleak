@@ -11,7 +11,7 @@ from bleak.backends.characteristic import BleakGATTCharacteristic
 from bleak.backends.descriptor import BleakGATTDescriptor
 from bleak.backends.corebluetooth.descriptor import BleakGATTDescriptorCoreBluetooth
 
-from Foundation import CBCharacteristic
+from Foundation import CBCharacteristic, CBMutableCharacteristic, CBUUID, NSData
 
 class CBChacteristicProperties(Enum):
     BROADCAST = 0x1
@@ -66,6 +66,16 @@ class BleakGATTCharacteristicCoreBluetooth(BleakGATTCharacteristic):
 
     def __str__(self):
         return "{0}: {1}".format(self.uuid, self.description)
+    
+    @staticmethod
+    def new(_uuid: str, properties: int, value: bytearray, permissions: int) -> BleakGATTCharacteristic:
+        """
+        Create a new characteristic from scratch for services
+        """
+        UUID = CBUUID.alloc().initWithString_(_uuid)
+        data = NSData.alloc().initWithBytes_length_(value, len(value))
+        newCharacteristic = CBMutableCharacteristic.alloc().initWithType_properties_value_permissions_(UUID, properties, data, permissions)
+        return BleakGATTCharacteristicCoreBluetooth(obj=newCharacteristic)
 
     @property
     def service_uuid(self) -> str:
