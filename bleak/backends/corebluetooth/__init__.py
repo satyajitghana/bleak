@@ -32,7 +32,7 @@ class Application():
         self.nsrunloop = NSRunLoop.currentRunLoop()
         
         self.central_manager_delegate = CentralManagerDelegate.alloc().init() if client else None
-        self.peripheral_manager_delegate = PeripheralManagerDelegate.alloc.init() if not client else None
+        self.peripheral_manager_delegate = PeripheralManagerDelegate.alloc().init() if not client else None
 
     def __del__(self):
         self.ns_run_loop_done = True
