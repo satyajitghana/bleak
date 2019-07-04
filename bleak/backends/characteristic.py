@@ -24,7 +24,6 @@ class GattCharacteristicsFlags(enum.Enum):
     reliable_write = 0x0100
     writable_auxiliaries = 0x0200
 
-
 class BleakGATTCharacteristic(abc.ABC):
     """Interface for the Bleak representation of a GATT Characteristic
 
@@ -35,6 +34,12 @@ class BleakGATTCharacteristic(abc.ABC):
 
     def __str__(self):
         return "{0}: {1}".format(self.uuid, self.description)
+
+    @staticmethod
+    @abc.abstractmethod
+    def new(_uuid: str, properties: int, value: bytearray, permissions: int):
+        """Create a new charactersitic for servers"""
+        raise NotImplementedError()
 
     @property
     @abc.abstractmethod
