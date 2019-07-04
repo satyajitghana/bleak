@@ -3,7 +3,7 @@ from typing import List, Union
 from bleak.backends.service import BleakGATTService
 from bleak.backends.corebluetooth.characteristic import BleakGATTCharacteristicCoreBluetooth
 
-from Foundation import CBService, CBUUID
+from Foundation import CBService, CBMutableService, CBUUID, NSStringFromClass, NSMutableArray
 
 
 class BleakGATTServiceCoreBluetooth(BleakGATTService):
@@ -11,7 +11,13 @@ class BleakGATTServiceCoreBluetooth(BleakGATTService):
 
     def __init__(self, obj: CBService):
         super().__init__(obj)
-        self.__characteristics = [ ]
+        self.__characteristics = []
+
+    @staticmethod
+    def new(_uuid: str) -> BleakGATTService:
+        cUUID = CBUUID.alloc().initWithString_(_uuid)
+        newService = CBMutableService.alloc().initWithType_primary_(cUUID, False)
+        return BleakGATTServiceCoreBluetooth(obj=newService)
 
     @property
     def uuid(self) -> str:
@@ -36,3 +42,11 @@ class BleakGATTServiceCoreBluetooth(BleakGATTService):
         Should not be used by end user, but rather by `bleak` itself.
         """
         self.__characteristics.append(characteristic)
+        
+        obj_class_name = NSStringFromClass(self.obj.class__())
+        if obj_class_name == "CBMutableService":
+            characteristic_objs = list(map(lambda x: x.obj, self.__characteristics))
+            characteristics = NSMutableArray.alloc().initWithArray_(self.obj.characteristics)
+            characteristics.addObject_(characteristic.obj)
+            self.obj.characteristics = characteristics
+
