@@ -67,6 +67,12 @@ class BleakGATTCharacteristic(abc.ABC):
 
     @property
     @abc.abstractmethod
+    def value(self) -> bytearray:
+        """Value of this characteristic"""
+        raise NotImplementedError()
+
+    @property
+    @abc.abstractmethod
     def descriptors(self) -> List:
         """List of descriptors for this service"""
         raise NotImplementedError()
@@ -82,4 +88,9 @@ class BleakGATTCharacteristic(abc.ABC):
 
         Should not be used by end user, but rather by `bleak` itself.
         """
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def set_value(self, value: bytearray):
+        """Set the value for the characteristic"""
         raise NotImplementedError()
