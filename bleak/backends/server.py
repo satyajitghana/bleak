@@ -8,7 +8,7 @@ Created on 2019-07-03 by kevincar <kevincarrolldavis@gmail.com>
 import abc
 import asyncio
 
-from bleak.backends.service import BleakGATTServiceCollection
+from bleak.backends.service import BleakGATTServiceCollection, BleakGATTService
 
 class BaseBleakServer(abc.ABC):
     """
@@ -26,7 +26,7 @@ class BaseBleakServer(abc.ABC):
         await self.start()
         return self
 
-    async def __aexit__(self):
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.stop()
 
     @abc.abstractmethod
@@ -49,3 +49,6 @@ class BaseBleakServer(abc.ABC):
         """
         raise NotImplementedError()
 
+    @abc.abstractmethod
+    async def add_service(self, service: BleakGATTService):
+        raise NotImplementedError()
