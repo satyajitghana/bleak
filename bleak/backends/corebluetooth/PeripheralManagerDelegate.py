@@ -71,6 +71,10 @@ class PeripheralManagerDelegate(NSObject):
         n_subscriptions = len(self._central_subscriptions)
         return n_subscriptions > 0
 
+    def is_advertising(self) -> bool:
+        """Determin whether the server is advertising"""
+        return self.peripheral_manager.isAdvertising()
+
     async def addService_(self, service: CBMutableService) -> bool:
         """Add service to the peripheral"""
         UUID = service.UUID().UUIDString()

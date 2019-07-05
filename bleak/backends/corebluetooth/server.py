@@ -58,6 +58,12 @@ class BleakServerCoreBluetooth(BaseBleakServer):
         """
         n_subscriptions = len(self.app.peripheral_manager_delegate._central_subscriptions)
         return n_subscriptions > 0
+
+    def is_advertising(self) -> bool:
+        """
+        Determine whether the service is advertising
+        """
+        return self.app.peripheral_manager_delegate.isAdvertising()
     
     async def add_service(self, service: BleakGATTService):
         """

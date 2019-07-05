@@ -50,14 +50,14 @@ class BaseBleakServer(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    async def is_connected(self) -> bool:
+    def is_connected(self) -> bool:
         """
         Determine whether there are any connected peripheral devices
         """
         raise NotImplementedError()
 
     @abc.abstractmethod
-    async def is_advertising(self) -> bool:
+    def is_advertising(self) -> bool:
         """
         Determine whether the server is advertising
         """
