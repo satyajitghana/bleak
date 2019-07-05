@@ -50,5 +50,12 @@ class BaseBleakServer(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
+    async def is_connected(self) -> bool:
+        """
+        Determine whether there are any connected peripheral devices
+        """
+        raise NotImplementedError()
+
+    @abc.abstractmethod
     async def add_service(self, service: BleakGATTService):
         raise NotImplementedError()
