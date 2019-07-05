@@ -105,6 +105,11 @@ class BleakGATTCharacteristicCoreBluetooth(BleakGATTCharacteristic):
         return self.__props
 
     @property
+    def value(self) -> bytearray:
+        """Value of this characteristic"""
+        return self.obj.value()
+
+    @property
     def descriptors(self) -> List[BleakGATTDescriptorCoreBluetooth]:
         """List of descriptors for this service"""
         return self.__descriptors
@@ -122,3 +127,7 @@ class BleakGATTCharacteristicCoreBluetooth(BleakGATTCharacteristic):
         Should not be used by end user, but rather by `bleak` itself.
         """
         self.__descriptors.append(descriptor)
+
+    def set_value(self, value: bytearray):
+        """Set the value for the characteristic"""
+        self.obj.setValue_(value)
