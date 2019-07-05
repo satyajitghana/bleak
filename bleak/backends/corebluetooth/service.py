@@ -2,10 +2,10 @@ import logging
 
 from typing import List, Union
 
-from bleak.backends.service import BleakGATTService
-from bleak.backends.corebluetooth.characteristic import BleakGATTCharacteristicCoreBluetooth
-
 from Foundation import CBService, CBMutableService, CBUUID, NSStringFromClass, NSMutableArray
+
+from bleak.backends.corebluetooth.characteristic import BleakGATTCharacteristicCoreBluetooth
+from bleak.backends.service import BleakGATTService
 
 logger = logging.getLogger(name=__name__)
 
@@ -39,7 +39,6 @@ class BleakGATTServiceCoreBluetooth(BleakGATTService):
             return next(filter(lambda x: x.uuid == _uuid, self.characteristics))
         except StopIteration:
             return None
-
 
     def add_characteristic(self, characteristic: BleakGATTCharacteristicCoreBluetooth):
         """Add a :py:class:`~BleakGATTCharacteristicDotNet` to the service.
