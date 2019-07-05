@@ -45,6 +45,10 @@ class BleakGATTServiceCoreBluetooth(BleakGATTService):
 
         Should not be used by end user, but rather by `bleak` itself.
         """
+        if characteristic in self.__characteristics:
+            logger.warn("Service {} already has characteristic {}".format(self.uuid, characteristic.uuid))
+            return
+
         self.__characteristics.append(characteristic)
         
         obj_class_name = NSStringFromClass(self.obj.class__())
