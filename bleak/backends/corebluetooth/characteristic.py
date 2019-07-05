@@ -32,7 +32,7 @@ class CBChacteristicProperties(Enum):
 
 class CBAttributePermissions(Enum):
     Readable = 0x1
-    Writable = 0x2
+    Writeable = 0x2
     ReadEncryptionRequired = 0x4
     WriteEncryptionRequired = 0x8
 
