@@ -8,12 +8,35 @@ Created on 2017-11-19 by hbldh <henrik.blidh@nedomkull.com>
 
 # Use PyObjC and PyObjC Core Bluetooth bindings for Bleak!
 import asyncio
+
+from enum import Enum
+
 from Foundation import NSDate, NSDefaultRunLoopMode, NSRunLoop
 from .CentralManagerDelegate import CentralManagerDelegate
 from .PeripheralManagerDelegate import PeripheralManagerDelegate
 
-# async def discover(device="hci0", timeout=5.0):
-    # raise NotImplementedError("CoreBluetooth discover not implemented yet.")
+
+class CBATTError(Enum):
+    """CBATTError enumeration"""
+    Success = 0x0
+    InvalidHandle = 0x1
+    ReadNotPermitted = 0x2
+    WriteNotPermitted = 0x3
+    InvalidPdu = 0x4
+    InsufficientAuthentication = 0x5
+    RequestNotSupported = 0x6
+    InvalidOffset = 0x7
+    InsufficientAuthorization = 0x8
+    PrepareQueueFull = 0x9
+    AttributeNotFound = 0xA
+    AttributeNotLong = 0xB
+    InsufficientEncryptionKeySize = 0xC
+    InvalidAttributeValueLength = 0xD
+    UnlikelyError = 0xE
+    InsufficientEncryption = 0xF
+    UnsupportedGroupType = 0x10
+    InsufficientResources = 0x11
+
 
 class Application():
     """
