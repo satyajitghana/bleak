@@ -1,3 +1,5 @@
+import logging
+
 from typing import List, Union
 
 from bleak.backends.service import BleakGATTService
@@ -5,9 +7,11 @@ from bleak.backends.corebluetooth.characteristic import BleakGATTCharacteristicC
 
 from Foundation import CBService, CBMutableService, CBUUID, NSStringFromClass, NSMutableArray
 
+logger = logging.getLogger(name=__name__)
+
 
 class BleakGATTServiceCoreBluetooth(BleakGATTService):
-    """GATT Characteristic implementation for the CoreBluetooth backend"""
+    """GATT Service implementation for the CoreBluetooth backend"""
 
     def __init__(self, obj: CBService):
         super().__init__(obj)
@@ -16,7 +20,8 @@ class BleakGATTServiceCoreBluetooth(BleakGATTService):
     @staticmethod
     def new(_uuid: str) -> BleakGATTService:
         cUUID = CBUUID.alloc().initWithString_(_uuid)
-        newService = CBMutableService.alloc().initWithType_primary_(cUUID, False)
+        newService = CBMutableService.alloc().initWithType_primary_(cUUID, True)
+        logger.debug("New CBMutableService created for {}".format(_uuid))
         return BleakGATTServiceCoreBluetooth(obj=newService)
 
     @property
@@ -45,8 +50,7 @@ class BleakGATTServiceCoreBluetooth(BleakGATTService):
         
         obj_class_name = NSStringFromClass(self.obj.class__())
         if obj_class_name == "CBMutableService":
-            characteristic_objs = list(map(lambda x: x.obj, self.__characteristics))
-            characteristics = NSMutableArray.alloc().initWithArray_(self.obj.characteristics)
-            characteristics.addObject_(characteristic.obj)
-            self.obj.characteristics = characteristics
+            characteristics = list(map(lambda x: x.obj, self.__characteristics))
+            self.obj.setCharacteristics_(characteristics)
+            logger.debug("Adding CBMutableCharacteristic {} to CBMutableService {}".format(characteristic.uuid, self.uuid))
 
