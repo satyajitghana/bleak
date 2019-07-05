@@ -37,7 +37,6 @@ class BleakClientCoreBluetooth(BaseBleakClient):
         self._device_info = None
         self._requester = None
         self._callbacks = {}
-        self._services = None
 
     def __str__(self):
         return "BleakClientCoreBluetooth ({})".format(self.address)
@@ -109,15 +108,16 @@ class BleakClientCoreBluetooth(BaseBleakClient):
            A :py:class:`bleak.backends.service.BleakGATTServiceCollection` with this device's services tree.
 
         """
-        if self._services != None:
-            return self._services
+        if self._services_resolved:
+            return self.services
 
-        logger.debug("retreiving services...")
+        logger.debug("Retreiving services...")
         services = await self.app.central_manager_delegate.connected_peripheral_delegate.discoverServices()
+        logger.debug("Retreived {} services".format(len(services)))
 
         for service in services:
             serviceUUID = service.UUID().UUIDString()
-            logger.debug("retreiving characteristics for service {}".format(serviceUUID))
+            logger.debug("Retreiving characteristics for service {}".format(serviceUUID))
             characteristics = await self.app.central_manager_delegate.connected_peripheral_delegate.discoverCharacteristics_(service)
 
             self.services.add_service(BleakGATTServiceCoreBluetooth(service))
@@ -135,6 +135,7 @@ class BleakClientCoreBluetooth(BaseBleakClient):
                                 )
                             )
         self._services_resolved = True
+        logger.debug("self.services: {}".format(self.services ))
         return self.services
 
     async def read_gatt_char(self, _uuid: str, use_cached=False, **kwargs) -> bytearray:
