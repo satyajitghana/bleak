@@ -19,7 +19,6 @@ from Foundation import NSObject, \
     NSData, \
     NSError
 
-from bleak.backends.corebluetooth.corebleak import CoreBleak
 from bleak.exc import BleakError
 
 # logging.basicConfig(level=logging.DEBUG)

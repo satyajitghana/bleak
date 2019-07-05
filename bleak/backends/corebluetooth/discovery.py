@@ -12,7 +12,6 @@ import asyncio
 from asyncio.events import AbstractEventLoop
 from typing import List
 
-from bleak.backends.corebluetooth import CBAPP as cbapp
 from bleak.backends.device import BLEDevice
 
 from ..corebluetooth.client import BleakClientCoreBluetooth as BleakClient

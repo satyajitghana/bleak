@@ -10,18 +10,12 @@ from typing import Callable, Any
 
 from Foundation import NSData, CBUUID
 
-from asyncio.events import AbstractEventLoop
-from bleak.exc import BleakError
-
-from bleak.backends.device import BLEDevice
-from bleak.backends.corebluetooth import Application
-
 from bleak.backends.client import BaseBleakClient
-from bleak.backends.corebluetooth import CBAPP as cbapp
+from bleak.backends.corebluetooth import Application
 from bleak.backends.corebluetooth.characteristic import BleakGATTCharacteristicCoreBluetooth
 from bleak.backends.corebluetooth.descriptor import BleakGATTDescriptorCoreBluetooth
-from bleak.backends.corebluetooth.discovery import discover
 from bleak.backends.corebluetooth.service import BleakGATTServiceCoreBluetooth
+from bleak.backends.device import BLEDevice
 from bleak.backends.service import BleakGATTServiceCollection
 from bleak.exc import BleakError
 
