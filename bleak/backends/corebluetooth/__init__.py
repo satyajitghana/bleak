@@ -8,6 +8,7 @@ Created on 2017-11-19 by hbldh <henrik.blidh@nedomkull.com>
 
 # Use PyObjC and PyObjC Core Bluetooth bindings for Bleak!
 import asyncio
+from asyncio import AbstractEventLoop
 
 from Foundation import NSDate, NSDefaultRunLoopMode, NSRunLoop
 from .CentralManagerDelegate import CentralManagerDelegate
@@ -23,8 +24,8 @@ class Application():
     ns_run_loop_done = False
     ns_run_loop_interval = 0.001
 
-    def __init__(self, client: bool = True):
-        self.main_loop = asyncio.get_event_loop()
+    def __init__(self, client: bool = True, loop: AbstractEventLoop = None):
+        self.main_loop = asyncio.get_event_loop() if loop is None else loop
         self.main_loop.create_task(self._handle_nsrunloop())
         self.main_loop.create_task(self._is_delegate_ready())
 
