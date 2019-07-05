@@ -4,6 +4,9 @@ Interface class for the Bleak representation of a GATT Characteristic
 Created on 2019-06-28 by kevincar <kevincarrolldavis@gmail.com>
 
 """
+
+import logging
+
 from typing import List, Union
 from enum import Enum
 
@@ -12,6 +15,9 @@ from bleak.backends.descriptor import BleakGATTDescriptor
 from bleak.backends.corebluetooth.descriptor import BleakGATTDescriptorCoreBluetooth
 
 from Foundation import CBCharacteristic, CBMutableCharacteristic, CBUUID, NSData
+
+logger = logging.getLogger(name=__name__)
+
 
 class CBChacteristicProperties(Enum):
     BROADCAST = 0x1
@@ -73,8 +79,8 @@ class BleakGATTCharacteristicCoreBluetooth(BleakGATTCharacteristic):
         Create a new characteristic from scratch for services
         """
         UUID = CBUUID.alloc().initWithString_(_uuid)
-        data = NSData.alloc().initWithBytes_length_(value, len(value))
-        newCharacteristic = CBMutableCharacteristic.alloc().initWithType_properties_value_permissions_(UUID, properties, data, permissions)
+        newCharacteristic = CBMutableCharacteristic.alloc().initWithType_properties_value_permissions_(UUID, properties, value, permissions)
+        logger.debug("New CBMutableCharacteristic. UUID: {}\tDATA: {}".format(UUID, value))
         return BleakGATTCharacteristicCoreBluetooth(obj=newCharacteristic)
 
     @property
