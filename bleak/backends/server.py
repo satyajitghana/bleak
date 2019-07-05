@@ -57,5 +57,11 @@ class BaseBleakServer(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
+    async def is_advertising(self) -> bool:
+        """
+        Determine whether the server is advertising
+        """
+
+    @abc.abstractmethod
     async def add_service(self, service: BleakGATTService):
         raise NotImplementedError()
