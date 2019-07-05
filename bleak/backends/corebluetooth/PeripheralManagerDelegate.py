@@ -13,6 +13,7 @@ import asyncio
 from typing import Any
 
 from bleak.exc import BleakError
+from bleak.backends.corebluetooth.error import CBATTError
 
 from Foundation import NSObject, \
     CBPeripheralManager, \
@@ -42,6 +43,9 @@ class PeripheralManagerDelegate(NSObject):
 
         self.peripheral_manager = CBPeripheralManager.alloc().initWithDelegate_queue_(self, None)
 
+        self.readRequestFunc = None
+        self.writeRequestsFunc = None
+
         self.ready = False
 
         self._services_added_log = {}
@@ -60,6 +64,12 @@ class PeripheralManagerDelegate(NSObject):
             await asyncio.sleep(0.01)
 
         return True
+
+    def is_connected(self) -> bool:
+        """Determin whether any peripherals have subscribed"""
+
+        n_subscriptions = len(self._central_subscriptions)
+        return n_subscriptions > 0
 
     async def addService_(self, service: CBMutableService) -> bool:
         """Add service to the peripheral"""
@@ -130,7 +140,7 @@ class PeripheralManagerDelegate(NSObject):
         central_uuid = central.identifier().UUIDString()
         char_uuid = characteristic.UUID().UUIDString()
         logger.debug("Central Device: {} is subscribing to characteristic {}".format(central_uuid, char_uuid))
-        if self._central_subscriptions[central_uuid]:
+        if central_uuid in self._central_subscriptions:
             subscriptions = self._central_subscriptions[central_uuid]
             if char_uuid not in subscriptions:
                 self._central_subscriptions[central_uuid].append(char_uuid)
@@ -151,9 +161,17 @@ class PeripheralManagerDelegate(NSObject):
     def peripheralManager_didReceiveReadRequest_(self, peripheral: CBPeripheralManager, request: CBATTRequest):
         # This should probably be a callback to be handled by the user, to be implemented or given to the BleakServer
         logger.debug("Received read request from {} for characteristic {}".format(request.central().identifier().UUIDString(), request.characteristic().UUID().UUIDString()))
-        peripheral.respondToRequest_withResult_(request, CBATTError.Success)
+        request.setValue_(self.readRequestFunc(request.characteristic().UUID().UUIDString()))
+        peripheral.respondToRequest_withResult_(request, CBATTError.Success.value)
 
     def peripheralManager_didReceiveWriteRequests_(self, peripheral: CBPeripheralManager, requests: [CBATTRequest]):
         # Again, this should likely be moved to a callback
-        logger.debug("Received write requests from {} for charactersitics {}".format(list(map(lambda x: x.central().identifier().UUIDString(), requests)), list(map(lambda x: x.characteristic().UUID().UUIDString(), requests))))
-        peripheral.respondToRequest_withResult_(requests[0], CBATTError.Success)
+        logger.debug("Receving write requests...")
+        for request in requests:
+            central = request.central()
+            char = request.characteristic()
+            value = request.value()
+            logger.debug("Write request from {} to {} with value {}".format(central.identifier().UUIDString(), char.UUID().UUIDString(), value))
+            self.writeRequestsFunc(char.UUID().UUIDString(), value)
+
+        peripheral.respondToRequest_withResult_(requests[0], CBATTError.Success.value)
