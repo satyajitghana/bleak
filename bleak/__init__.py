@@ -58,6 +58,7 @@ elif platform.system() == "Darwin":
     from bleak.backends.corebluetooth.server import BleakServerCoreBluetooth as BleakServer
     from bleak.backends.corebluetooth.service import BleakGATTServiceCoreBluetooth as BleakGATTService
     from bleak.backends.corebluetooth.characteristic import BleakGATTCharacteristicCoreBluetooth as BleakGATTCharacteristic
+    from bleak.backends.corebluetooth.characteristic import CBAttributePermissions as BleakGATTPermissions
 
 elif platform.system() == "Windows":
     # Requires Windows 10 Creators update at least, i.e. Window 10.0.16299
