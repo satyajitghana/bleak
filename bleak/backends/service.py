@@ -23,6 +23,15 @@ class BleakGATTService(abc.ABC):
     def __str__(self):
         return "{0}: {1}".format(self.uuid, self.description)
 
+    @staticmethod
+    @abc.abstractmethod
+    def new(_uuid: str):
+        """
+        Create an empty new service
+        This is used for establishing new services for use of BLE services
+        """
+        raise NotImplementedError()
+
     @property
     @abc.abstractmethod
     def uuid(self) -> str:

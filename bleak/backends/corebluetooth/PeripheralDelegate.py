@@ -40,7 +40,7 @@ class PeripheralDelegate(NSObject):
             return None
 
         self.peripheral = peripheral
-        CoreBleak.assignPeripheralDelegate_toPeripheral_(self, self.peripheral)
+        self.peripheral.setDelegate_(self)
 
         self._services_discovered = False
 
