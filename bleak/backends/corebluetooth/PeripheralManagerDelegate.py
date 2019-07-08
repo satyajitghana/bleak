@@ -104,6 +104,7 @@ class PeripheralManagerDelegate(NSObject):
     # Protocol-specific functions
 
     def peripheralManagerDidUpdateState_(self, peripheral: CBPeripheralManager):
+        self.ready = False
         if peripheral.state() == 0:
             logger.debug("Cannot detect bluetooth device")
         elif peripheral.state() == 1:
@@ -116,8 +117,8 @@ class PeripheralManagerDelegate(NSObject):
             logger.debug("Bluetooth powered off")
         elif peripheral.state() == 5:
             logger.debug("Bluetooth powered on")
+            self.ready = True
 
-        self.ready = True
 
     def peripheralManager_willRestoreState_(self, peripheral: CBPeripheralManager, d: dict):
         logger.debug("PeripheralManager restoring state: {}".format(d))
