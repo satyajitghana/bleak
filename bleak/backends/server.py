@@ -7,6 +7,7 @@ Created on 2019-07-03 by kevincar <kevincarrolldavis@gmail.com>
 
 import abc
 import asyncio
+from asyncio import AbstractEventLoop
 
 from bleak.backends.service import BleakGATTServiceCollection, BleakGATTService
 
@@ -15,7 +16,7 @@ class BaseBleakServer(abc.ABC):
     The Server Interface for Bleak Backend
     """
 
-    def __init__(self, loop = None, **kwargs):
+    def __init__(self, loop: AbstractEventLoop = None, **kwargs):
         self.loop = loop if loop else asyncio.get_event_loop()
 
         self.services = BleakGATTServiceCollection()
