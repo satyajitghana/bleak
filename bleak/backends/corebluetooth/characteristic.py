@@ -4,14 +4,19 @@ Interface class for the Bleak representation of a GATT Characteristic
 Created on 2019-06-28 by kevincar <kevincarrolldavis@gmail.com>
 
 """
-from typing import List, Union
+
+import logging
+
 from enum import Enum
+from typing import List, Union
+
+from Foundation import CBCharacteristic, CBMutableCharacteristic, CBUUID, NSData
 
 from bleak.backends.characteristic import BleakGATTCharacteristic
-from bleak.backends.descriptor import BleakGATTDescriptor
 from bleak.backends.corebluetooth.descriptor import BleakGATTDescriptorCoreBluetooth
+from bleak.backends.descriptor import BleakGATTDescriptor
 
-from Foundation import CBCharacteristic
+logger = logging.getLogger(name=__name__)
 
 class CBChacteristicProperties(Enum):
     BROADCAST = 0x1
@@ -24,6 +29,12 @@ class CBChacteristicProperties(Enum):
     EXTENDED_PROPERTIES = 0x80
     NOTIFY_ENCRYPTION_REQUIRED = 0x100
     INDICATE_ENCRYPTION_REQUIRED = 0x200
+
+class CBAttributePermissions(Enum):
+    Readable = 0x1
+    Writeable = 0x2
+    ReadEncryptionRequired = 0x4
+    WriteEncryptionRequired = 0x8
 
 _GattCharacteristicsPropertiesEnum = {
     None: ("None", "The characteristic doesn’t have any properties that apply"),
@@ -51,6 +62,7 @@ _GattCharacteristicsPropertiesEnum = {
     ),
 }
 
+
 class BleakGATTCharacteristicCoreBluetooth(BleakGATTCharacteristic):
     """GATT Characteristic implementation for the CoreBluetooth backend"""
 
@@ -66,6 +78,16 @@ class BleakGATTCharacteristicCoreBluetooth(BleakGATTCharacteristic):
 
     def __str__(self):
         return "{0}: {1}".format(self.uuid, self.description)
+    
+    @staticmethod
+    def new(_uuid: str, properties: int, value: bytearray, permissions: int) -> BleakGATTCharacteristic:
+        """
+        Create a new characteristic from scratch for services
+        """
+        UUID = CBUUID.alloc().initWithString_(_uuid)
+        newCharacteristic = CBMutableCharacteristic.alloc().initWithType_properties_value_permissions_(UUID, properties, value, permissions)
+        logger.debug("New CBMutableCharacteristic. UUID: {}\tDATA: {}".format(UUID, value))
+        return BleakGATTCharacteristicCoreBluetooth(obj=newCharacteristic)
 
     @property
     def service_uuid(self) -> str:
@@ -77,15 +99,21 @@ class BleakGATTCharacteristicCoreBluetooth(BleakGATTCharacteristic):
         """The uuid of this characteristic"""
         return self.obj.UUID().UUIDString()
 
-    # @property
+    @property
     def description(self) -> str:
         """Description for this characteristic"""
-        raise NotImplementedError()
+        # No description available in Core Bluetooth backend.
+        return ""
 
     @property
     def properties(self) -> List:
         """Properties of this characteristic"""
         return self.__props
+
+    @property
+    def value(self) -> bytearray:
+        """Value of this characteristic"""
+        return self.obj.value()
 
     @property
     def descriptors(self) -> List[BleakGATTDescriptorCoreBluetooth]:
@@ -105,3 +133,7 @@ class BleakGATTCharacteristicCoreBluetooth(BleakGATTCharacteristic):
         Should not be used by end user, but rather by `bleak` itself.
         """
         self.__descriptors.append(descriptor)
+
+    def set_value(self, value: bytearray):
+        """Set the value for the characteristic"""
+        self.obj.setValue_(value)

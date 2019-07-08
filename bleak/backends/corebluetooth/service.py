@@ -1,17 +1,28 @@
+import logging
+
 from typing import List, Union
 
-from bleak.backends.service import BleakGATTService
-from bleak.backends.corebluetooth.characteristic import BleakGATTCharacteristicCoreBluetooth
+from Foundation import CBService, CBMutableService, CBUUID, NSStringFromClass, NSMutableArray
 
-from Foundation import CBService, CBUUID
+from bleak.backends.corebluetooth.characteristic import BleakGATTCharacteristicCoreBluetooth
+from bleak.backends.service import BleakGATTService
+
+logger = logging.getLogger(name=__name__)
 
 
 class BleakGATTServiceCoreBluetooth(BleakGATTService):
-    """GATT Characteristic implementation for the CoreBluetooth backend"""
+    """GATT Service implementation for the CoreBluetooth backend"""
 
     def __init__(self, obj: CBService):
         super().__init__(obj)
-        self.__characteristics = [ ]
+        self.__characteristics = []
+
+    @staticmethod
+    def new(_uuid: str) -> BleakGATTService:
+        cUUID = CBUUID.alloc().initWithString_(_uuid)
+        newService = CBMutableService.alloc().initWithType_primary_(cUUID, True)
+        logger.debug("New CBMutableService created for {}".format(_uuid))
+        return BleakGATTServiceCoreBluetooth(obj=newService)
 
     @property
     def uuid(self) -> str:
@@ -29,10 +40,20 @@ class BleakGATTServiceCoreBluetooth(BleakGATTService):
         except StopIteration:
             return None
 
-
     def add_characteristic(self, characteristic: BleakGATTCharacteristicCoreBluetooth):
         """Add a :py:class:`~BleakGATTCharacteristicDotNet` to the service.
 
         Should not be used by end user, but rather by `bleak` itself.
         """
+        if characteristic in self.__characteristics:
+            logger.warn("Service {} already has characteristic {}".format(self.uuid, characteristic.uuid))
+            return
+
         self.__characteristics.append(characteristic)
+        
+        obj_class_name = NSStringFromClass(self.obj.class__())
+        if obj_class_name == "CBMutableService":
+            characteristics = list(map(lambda x: x.obj, self.__characteristics))
+            self.obj.setCharacteristics_(characteristics)
+            logger.debug("Adding CBMutableCharacteristic {} to CBMutableService {}".format(characteristic.uuid, self.uuid))
+

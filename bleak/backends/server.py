@@ -7,15 +7,16 @@ Created on 2019-07-03 by kevincar <kevincarrolldavis@gmail.com>
 
 import abc
 import asyncio
+from asyncio import AbstractEventLoop
 
-from bleak.backends.service import BleakGATTServiceCollection
+from bleak.backends.service import BleakGATTServiceCollection, BleakGATTService
 
 class BaseBleakServer(abc.ABC):
     """
     The Server Interface for Bleak Backend
     """
 
-    def __init__(self, loop = None, **kwargs):
+    def __init__(self, loop: AbstractEventLoop = None, **kwargs):
         self.loop = loop if loop else asyncio.get_event_loop()
 
         self.services = BleakGATTServiceCollection()
@@ -26,7 +27,7 @@ class BaseBleakServer(abc.ABC):
         await self.start()
         return self
 
-    async def __aexit__(self):
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.stop()
 
     @abc.abstractmethod
@@ -49,3 +50,19 @@ class BaseBleakServer(abc.ABC):
         """
         raise NotImplementedError()
 
+    @abc.abstractmethod
+    def is_connected(self) -> bool:
+        """
+        Determine whether there are any connected peripheral devices
+        """
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def is_advertising(self) -> bool:
+        """
+        Determine whether the server is advertising
+        """
+
+    @abc.abstractmethod
+    async def add_service(self, service: BleakGATTService):
+        raise NotImplementedError()

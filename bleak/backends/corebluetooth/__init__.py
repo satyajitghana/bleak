@@ -8,12 +8,12 @@ Created on 2017-11-19 by hbldh <henrik.blidh@nedomkull.com>
 
 # Use PyObjC and PyObjC Core Bluetooth bindings for Bleak!
 import asyncio
+from asyncio import AbstractEventLoop
+
 from Foundation import NSDate, NSDefaultRunLoopMode, NSRunLoop
 from .CentralManagerDelegate import CentralManagerDelegate
 from .PeripheralManagerDelegate import PeripheralManagerDelegate
 
-# async def discover(device="hci0", timeout=5.0):
-    # raise NotImplementedError("CoreBluetooth discover not implemented yet.")
 
 class Application():
     """
@@ -24,15 +24,15 @@ class Application():
     ns_run_loop_done = False
     ns_run_loop_interval = 0.001
 
-    def __init__(self, client: bool = True):
-        self.main_loop = asyncio.get_event_loop()
+    def __init__(self, client: bool = True, loop: AbstractEventLoop = None):
+        self.main_loop = asyncio.get_event_loop() if loop is None else loop
         self.main_loop.create_task(self._handle_nsrunloop())
         self.main_loop.create_task(self._is_delegate_ready())
 
         self.nsrunloop = NSRunLoop.currentRunLoop()
         
         self.central_manager_delegate = CentralManagerDelegate.alloc().init() if client else None
-        self.peripheral_manager_delegate = PeripheralManagerDelegate.alloc.init() if not client else None
+        self.peripheral_manager_delegate = PeripheralManagerDelegate.alloc().init() if not client else None
 
     def __del__(self):
         self.ns_run_loop_done = True
