@@ -23,7 +23,7 @@ class BleakServerCoreBluetooth(BaseBleakServer):
     def __init__(self, name: str, loop: AbstractEventLoop = None, **kwargs):
         super(BleakServerCoreBluetooth, self).__init__(loop=loop, **kwargs)
 
-        self.app = Application(client=False, loop=loop)
+        self.app = Application(client=False, loop=self.loop)
         self.name = name
         self.services = BleakGATTServiceCollection()
         self.read_request_func = None
