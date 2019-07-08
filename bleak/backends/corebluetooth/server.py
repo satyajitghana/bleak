@@ -6,12 +6,12 @@ Created on 2019-07-03 by kevincar <kevincarrolldavis@gmail.com>
 
 import logging
 
-from typing import Any, Callable
+from typing import Any
 from asyncio.events import AbstractEventLoop
 
 from bleak.exc import BleakError
 from bleak.backends.server import BaseBleakServer
-from bleak.backends.service import BleakGATTServiceCollection, BleakGATTService, BleakGATTCharacteristic
+from bleak.backends.service import BleakGATTServiceCollection, BleakGATTService
 from bleak.backends.corebluetooth import Application
 
 logger = logging.getLogger(name=__name__)
@@ -20,14 +20,17 @@ logger = logging.getLogger(name=__name__)
 class BleakServerCoreBluetooth(BaseBleakServer):
     """CoreBluetooth Implementation of BleakServer"""
 
-    def __init__(self, name: str, loop: AbstractEventLoop, **kwargs):
+    def __init__(self, name: str, loop: AbstractEventLoop = None, **kwargs):
         super(BleakServerCoreBluetooth, self).__init__(loop=loop, **kwargs)
 
-        self.app = Application(client=False)
+        self.app = Application(client=False, loop=loop)
         self.name = name
         self.services = BleakGATTServiceCollection()
         self.read_request_func = None
         self.write_request_func = None
+
+    def __del__(self):
+        self.app.__del__()
 
     async def is_ready(self):
         await self.app._is_delegate_ready()
@@ -78,6 +81,10 @@ class BleakServerCoreBluetooth(BaseBleakServer):
             raise BleakError("Failed to add Service")
 
     def read_request(self, uuid: str) -> bytearray:
+        """
+        Obtain the characteritic to read and pass on to the user-defined
+        read_request_func
+        """
         characteristic = self.services.get_characteristic(uuid)
         logger.debug("Char: {}".format(characteristic))
         if not characteristic:
@@ -86,6 +93,10 @@ class BleakServerCoreBluetooth(BaseBleakServer):
         return self.read_request_func(characteristic, server=self)
 
     def write_request(self, uuid: str, value: Any):
+        """
+        Obtain the characteristic to write and pass on to the user-defined
+        write_request_func
+        """
         logger.debug("Write request for char {} to value: {}".format(uuid, value))
         characteristic = self.services.get_characteristic(uuid)
-        self.write_request_func(characteristic, value)
+        self.write_request_func(characteristic, value, server=self)
