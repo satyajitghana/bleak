@@ -79,16 +79,6 @@ class BleakGATTCharacteristicCoreBluetooth(BleakGATTCharacteristic):
     def __str__(self):
         return "{0}: {1}".format(self.uuid, self.description)
     
-    @staticmethod
-    def new(_uuid: str, properties: int, value: bytearray, permissions: int) -> BleakGATTCharacteristic:
-        """
-        Create a new characteristic from scratch for services
-        """
-        UUID = CBUUID.alloc().initWithString_(_uuid)
-        newCharacteristic = CBMutableCharacteristic.alloc().initWithType_properties_value_permissions_(UUID, properties, value, permissions)
-        logger.debug("New CBMutableCharacteristic. UUID: {}\tDATA: {}".format(UUID, value))
-        return BleakGATTCharacteristicCoreBluetooth(obj=newCharacteristic)
-
     @property
     def service_uuid(self) -> str:
         """The uuid of the Service containing this characteristic"""
