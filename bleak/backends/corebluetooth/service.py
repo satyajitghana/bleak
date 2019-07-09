@@ -2,10 +2,11 @@ import logging
 
 from typing import List, Union
 
-from Foundation import CBService, CBMutableService, CBUUID, NSStringFromClass, NSMutableArray
+from Foundation import CBService, CBMutableCharacteristic, CBUUID, NSStringFromClass 
 
 from bleak.backends.corebluetooth.characteristic import BleakGATTCharacteristicCoreBluetooth
 from bleak.backends.service import BleakGATTService
+from bleak.backends.characteristic import GattCharacteristicsFlags
 
 logger = logging.getLogger(name=__name__)
 
@@ -16,13 +17,6 @@ class BleakGATTServiceCoreBluetooth(BleakGATTService):
     def __init__(self, obj: CBService):
         super().__init__(obj)
         self.__characteristics = []
-
-    @staticmethod
-    def new(_uuid: str) -> BleakGATTService:
-        cUUID = CBUUID.alloc().initWithString_(_uuid)
-        newService = CBMutableService.alloc().initWithType_primary_(cUUID, True)
-        logger.debug("New CBMutableService created for {}".format(_uuid))
-        return BleakGATTServiceCoreBluetooth(obj=newService)
 
     @property
     def uuid(self) -> str:
@@ -56,4 +50,3 @@ class BleakGATTServiceCoreBluetooth(BleakGATTService):
             characteristics = list(map(lambda x: x.obj, self.__characteristics))
             self.obj.setCharacteristics_(characteristics)
             logger.debug("Adding CBMutableCharacteristic {} to CBMutableService {}".format(characteristic.uuid, self.uuid))
-
