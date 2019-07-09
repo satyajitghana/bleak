@@ -6,13 +6,17 @@ Created on 2019-07-03 by kevincar <kevincarrolldavis@gmail.com>
 
 import logging
 
-from typing import Any
 from asyncio.events import AbstractEventLoop
+
+from Foundation import CBUUID, CBMutableService, CBMutableCharacteristic
 
 from bleak.exc import BleakError
 from bleak.backends.server import BaseBleakServer
-from bleak.backends.service import BleakGATTServiceCollection, BleakGATTService
+from bleak.backends.service import BleakGATTServiceCollection
+from bleak.backends.characteristic import GattCharacteristicsFlags
 from bleak.backends.corebluetooth import Application
+from bleak.backends.corebluetooth.service import BleakGATTServiceCoreBluetooth
+from bleak.backends.corebluetooth.characteristic import BleakGATTCharacteristicCoreBluetooth
 
 logger = logging.getLogger(name=__name__)
 
@@ -40,7 +44,13 @@ class BleakServerCoreBluetooth(BaseBleakServer):
 
     async def start(self):
         await self.is_ready()
-        
+
+        for service_uuid in self.services.services:
+            bleak_service = self.services.get_service(service_uuid)
+            service_obj = bleak_service.obj
+            print(f"Adding service: {bleak_service.uuid}")
+            await self.app.peripheral_manager_delegate.addService_(service_obj)
+
         if not self.read_request_func or not self.write_request_func:
             raise BleakError("Callback functions must be initialized first")
 
@@ -68,35 +78,26 @@ class BleakServerCoreBluetooth(BaseBleakServer):
         """
         return self.app.peripheral_manager_delegate.is_advertising() == 1
     
-    async def add_service(self, service: BleakGATTService):
+    async def add_new_service(self, _uuid: str):
         """
         Add a service and all it's characteristics to be advertised
         """
-        logger.debug("Adding service {} to server".format(service.uuid))
-        self.services.add_service(service)
-        for characteristic in service.characteristics:
-            self.services.add_characteristic(characteristic)
+        logger.debug("Creating a new service with uuid: {}".format(_uuid))
 
-        if not await self.app.peripheral_manager_delegate.addService_(service.obj):
-            raise BleakError("Failed to add Service")
+        service_uuid = CBUUID.alloc().initWithString_(_uuid)
+        cb_service = CBMutableService.alloc().initWithType_primary_(service_uuid, True)
+        bleak_service = BleakGATTServiceCoreBluetooth(obj=cb_service)
 
-    def read_request(self, uuid: str) -> bytearray:
-        """
-        Obtain the characteritic to read and pass on to the user-defined
-        read_request_func
-        """
-        characteristic = self.services.get_characteristic(uuid)
-        logger.debug("Char: {}".format(characteristic))
-        if not characteristic:
-            raise BleakError("Invalid characteristic: {}".format(uuid))
+        self.services.add_service(bleak_service)
 
-        return self.read_request_func(characteristic, server=self)
+    async def add_new_characteristic(self, service_uuid: str, char_uuid: str, properties: GattCharacteristicsFlags, value: bytearray, permissions: int):
+        """
+        Generate a new characteristic to be associated with the server
+        """
+        logger.debug("Craeting a new characteristic with uuid: {}".format(char_uuid))
+        cb_uuid = CBUUID.alloc().initWithString_(char_uuid)
+        cb_characteristic = CBMutableCharacteristic.alloc().initWithType_properties_value_permissions_(cb_uuid, properties, value, permissions)
+        bleak_characteristic = BleakGATTCharacteristicCoreBluetooth(obj=cb_characteristic)
+        self.services.get_service(service_uuid).add_characteristic(bleak_characteristic)
 
-    def write_request(self, uuid: str, value: Any):
-        """
-        Obtain the characteristic to write and pass on to the user-defined
-        write_request_func
-        """
-        logger.debug("Write request for char {} to value: {}".format(uuid, value))
-        characteristic = self.services.get_characteristic(uuid)
-        self.write_request_func(characteristic, value, server=self)
+        self.services.add_characteristic(bleak_characteristic)
