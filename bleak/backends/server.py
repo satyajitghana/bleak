@@ -7,9 +7,12 @@ Created on 2019-07-03 by kevincar <kevincarrolldavis@gmail.com>
 
 import abc
 import asyncio
+from typing import Any
 from asyncio import AbstractEventLoop
 
-from bleak.backends.service import BleakGATTServiceCollection, BleakGATTService
+from bleak.exc import BleakError
+from bleak.backends.service import BleakGATTServiceCollection
+from bleak.backends.characteristic import GattCharacteristicsFlags
 
 class BaseBleakServer(abc.ABC):
     """
@@ -20,6 +23,8 @@ class BaseBleakServer(abc.ABC):
         self.loop = loop if loop else asyncio.get_event_loop()
 
         self.services = BleakGATTServiceCollection()
+        self.read_request_func = None
+        self.write_request_func = None
 
     # Async Context managers
 
@@ -64,5 +69,34 @@ class BaseBleakServer(abc.ABC):
         """
 
     @abc.abstractmethod
-    async def add_service(self, service: BleakGATTService):
+    async def add_new_service(self, _uuid: str):
+        """
+        Generate a new service to be associated with the server
+        """
         raise NotImplementedError()
+
+    @abc.abstractmethod
+    async def add_new_characteristic(self, service_uuid: str, char_uuid: str, properties: GattCharacteristicsFlags, value: bytearray, permissions: int):
+        """
+        Generate a new characteristic to be associated with the server
+        """
+        raise NotImplementedError()
+
+    def read_request(self, uuid: str) -> bytearray:
+        """
+        Obtain the characteritic to read and pass on to the user-defined
+        read_request_func
+        """
+        characteristic = self.services.get_characteristic(uuid)
+        if not characteristic:
+            raise BleakError("Invalid characteristic: {}".format(uuid))
+
+        return self.read_request_func(characteristic, server=self)
+
+    def write_request(self, uuid: str, value: Any):
+        """
+        Obtain the characteristic to write and pass on to the user-defined
+        write_request_func
+        """
+        characteristic = self.services.get_characteristic(uuid)
+        self.write_request_func(characteristic, value, server=self)
