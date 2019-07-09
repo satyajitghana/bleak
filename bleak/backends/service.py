@@ -10,7 +10,7 @@ from typing import List, Union, Iterator
 
 from bleak import BleakError
 from bleak.uuids import uuidstr_to_str
-from bleak.backends.characteristic import BleakGATTCharacteristic
+from bleak.backends.characteristic import BleakGATTCharacteristic, GattCharacteristicsFlags
 from bleak.backends.descriptor import BleakGATTDescriptor
 
 
@@ -22,15 +22,6 @@ class BleakGATTService(abc.ABC):
 
     def __str__(self):
         return "{0}: {1}".format(self.uuid, self.description)
-
-    @staticmethod
-    @abc.abstractmethod
-    def new(_uuid: str):
-        """
-        Create an empty new service
-        This is used for establishing new services for use of BLE services
-        """
-        raise NotImplementedError()
 
     @property
     @abc.abstractmethod

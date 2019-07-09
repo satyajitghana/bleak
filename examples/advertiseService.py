@@ -5,7 +5,7 @@ Example for publishing a service on a BLE 4.0 Server
 import logging
 import asyncio
 from bleak.backends.characteristic import GattCharacteristicsFlags
-from bleak import BleakServer, BleakGATTService, BleakGATTCharacteristic
+from bleak import BleakServer 
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(name=__name__)
@@ -21,11 +21,13 @@ my_characteristic_permissions = 0x3
 
 async def run(loop):
     server = BleakServer(name=my_service_name, loop=loop)
-    await server.is_ready()
-    char = BleakGATTCharacteristic.new(my_characteristic_uuid, 0x2, bytearray(my_characteristic_value.encode()), 0x1)
-    service = BleakGATTService.new(my_service_uuid)
-    service.add_characteristic(char)
-    await server.add_service(service)
+    # char = BleakGATTCharacteristic.new(my_characteristic_uuid, 0x2, bytearray(my_characteristic_value.encode()), 0x1)
+    # service = BleakGATTService.new(my_service_uuid)
+    # service.add_characteristic(char)
+    await server.add_new_service(my_service_uuid)
+    await server.add_new_characteristic(my_service_uuid, my_characteristic_uuid, my_characteristic_properties, None, my_characteristic_permissions)
+    server.read_request_func = lambda x: print(x)
+    server.write_request_func = lambda x: print(x)
     await server.start()
     await asyncio.sleep(20)
 

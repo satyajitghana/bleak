@@ -35,12 +35,6 @@ class BleakGATTCharacteristic(abc.ABC):
     def __str__(self):
         return "{0}: {1}".format(self.uuid, self.description)
 
-    @staticmethod
-    @abc.abstractmethod
-    def new(_uuid: str, properties: int, value: bytearray, permissions: int):
-        """Create a new charactersitic for servers"""
-        raise NotImplementedError()
-
     @property
     @abc.abstractmethod
     def service_uuid(self) -> str:

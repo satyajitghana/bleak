@@ -48,7 +48,7 @@ class PeripheralManagerDelegate(NSObject):
 
         self.ready = False
 
-        self._services_added_log = {}
+        self._services_added_events = {}
         self._services_added_result = {}
         self._advertisement_started = False
 
@@ -78,12 +78,11 @@ class PeripheralManagerDelegate(NSObject):
     async def addService_(self, service: CBMutableService) -> bool:
         """Add service to the peripheral"""
         UUID = service.UUID().UUIDString()
-        self._services_added_log[UUID] = False
+        self._services_added_events[UUID] = asyncio.Event()
     
         self.peripheral_manager.addService_(service)
 
-        while not self._services_added_log[UUID]:
-            await asyncio.sleep(0.01)
+        await self._services_added_events[UUID].wait()
 
         return self._services_added_result[UUID]
 
@@ -132,7 +131,7 @@ class PeripheralManagerDelegate(NSObject):
         logger.debug("Peripheral manager did add service: {}".format(UUID))
         logger.debug("service added had characteristics: {}".format(service.characteristics()))
         self._services_added_result[UUID] = True
-        self._services_added_log[UUID] = True
+        self._services_added_events[UUID].set()
 
     def peripheralManagerDidStartAdvertising_error_(self, peripheral: CBPeripheralManager, error: NSError):
         if error:
