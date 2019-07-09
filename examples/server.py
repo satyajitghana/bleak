@@ -27,24 +27,17 @@ def write_request(characteristic: BleakGATTCharacteristic, value: Any, **kwargs)
 
 async def run(loop):
     server = BleakServer(name=my_service_name, loop=loop)
-    await server.is_ready()
-    main_char = BleakGATTCharacteristic.new(
+    await server.add_new_service(my_service_uuid)
+    await server.add_new_characteristic(my_service_uuid, 
         "51FF12BB-3ED8-46E5-B4F9-D64E2FEC021B", 
         GattCharacteristicsFlags.read.value | GattCharacteristicsFlags.write.value | GattCharacteristicsFlags.indicate.value, 
         None,
         0x1 | 0x2)
 
-    service = BleakGATTService.new(my_service_uuid)
-    service.add_characteristic(main_char)
-    await server.add_service(service)
-
     server.read_request_func = read_request
     server.write_request_func = write_request
 
-    print(f"me: {server.is_advertising()}")
-
     await server.start()
-    print(f"me: {server.is_advertising()}")
     await asyncio.sleep(40)
     await server.stop()
 
