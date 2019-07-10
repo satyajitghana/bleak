@@ -13,6 +13,7 @@ from bleak.uuids import uuidstr_to_str
 from bleak.backends.characteristic import BleakGATTCharacteristic, GattCharacteristicsFlags
 from bleak.backends.descriptor import BleakGATTDescriptor
 
+from Windows.Devices.Bluetooth.GenericAttributeProfile import GattLocalCharacteristic
 
 class BleakGATTService(abc.ABC):
     """Interface for the Bleak representation of a GATT Service."""
@@ -112,9 +113,10 @@ class BleakGATTServiceCollection(object):
         """
         if characteristic.uuid not in self.__characteristics:
             self.__characteristics[characteristic.uuid] = characteristic
-            self.__services[characteristic.service_uuid].add_characteristic(
-                characteristic
-            )
+            if not isinstance(characteristic.obj, GattLocalCharacteristic):
+                self.__services[characteristic.service_uuid].add_characteristic(
+                    characteristic
+                )
         else:
             raise BleakError(
                 "This characteristic is already present in this BleakGATTServiceCollection!"

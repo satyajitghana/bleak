@@ -9,7 +9,7 @@ import asyncio
 from typing import Any
 
 from bleak.backends.characteristic import GattCharacteristicsFlags
-from bleak import BleakServer, BleakGATTService, BleakGATTCharacteristic
+from bleak import BleakServer
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(name=__name__)

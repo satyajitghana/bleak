@@ -77,6 +77,9 @@ elif platform.system() == "Windows":
 
     from bleak.backends.dotnet.discovery import discover  # noqa
     from bleak.backends.dotnet.client import BleakClientDotNet as BleakClient  # noqa
+    from bleak.backends.dotnet.server import BleakServerDotNet as BleakServer
+    from bleak.backends.dotnet.service import BleakGATTServiceDotNet as BleakGATTService
+    from bleak.backends.dotnet.characteristic import BleakGATTCharacteristicDotNet as BleakGATTCharacteristic
 
 
 def cli():
