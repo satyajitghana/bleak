@@ -73,6 +73,11 @@ class BleakGATTServiceDotNet(BleakGATTService):
 class BleakGATTServiceCollectionDotNet(BleakGATTServiceCollection):
     """Simple data container for storing the peripheral's service complement."""
 
+    def get_characteristic(self, _uuid) -> BleakGATTCharacteristicDotNet:
+        """Get a characteristic by UUID string"""
+        return self.characteristics.get(_uuid.lower(), None)
+    
+    
     def add_characteristic(self, characteristic: BleakGATTCharacteristicDotNet):
         """Add a :py:class:`~BleakGATTCharacteristic` to the service collection.
 
