@@ -73,15 +73,20 @@ class BleakGATTServiceDotNet(BleakGATTService):
 class BleakGATTServiceCollectionDotNet(BleakGATTServiceCollection):
     """Simple data container for storing the peripheral's service complement."""
 
+    def get_characteristic(self, _uuid) -> BleakGATTCharacteristicDotNet:
+        """Get a characteristic by UUID string"""
+        return self.characteristics.get(_uuid.lower(), None)
+    
+    
     def add_characteristic(self, characteristic: BleakGATTCharacteristicDotNet):
         """Add a :py:class:`~BleakGATTCharacteristic` to the service collection.
 
         Should not be used by end user, but rather by `bleak` itself.
         """
-        if characteristic.uuid not in self.__characteristics:
-            self.__characteristics[characteristic.uuid] = characteristic
+        if characteristic.uuid not in self.characteristics:
+            self.characteristics[characteristic.uuid] = characteristic
             if not isinstance(characteristic.obj, GattLocalCharacteristic):
-                self.__services[characteristic.service_uuid].add_characteristic(
+                self.services[characteristic.service_uuid].add_characteristic(
                     characteristic
                 )
         else:
