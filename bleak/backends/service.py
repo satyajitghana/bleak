@@ -10,10 +10,9 @@ from typing import List, Union, Iterator
 
 from bleak import BleakError
 from bleak.uuids import uuidstr_to_str
-from bleak.backends.characteristic import BleakGATTCharacteristic, GattCharacteristicsFlags
+from bleak.backends.characteristic import BleakGATTCharacteristic
 from bleak.backends.descriptor import BleakGATTDescriptor
 
-from Windows.Devices.Bluetooth.GenericAttributeProfile import GattLocalCharacteristic
 
 class BleakGATTService(abc.ABC):
     """Interface for the Bleak representation of a GATT Service."""
@@ -55,7 +54,7 @@ class BleakGATTService(abc.ABC):
         raise NotImplementedError()
 
 
-class BleakGATTServiceCollection(object):
+class BleakGATTServiceCollection(abc.ABC):
     """Simple data container for storing the peripheral's service complement."""
 
     def __init__(self):
@@ -106,21 +105,13 @@ class BleakGATTServiceCollection(object):
         """Get a service by UUID string"""
         return self.services.get(_uuid, None)
 
+    @abc.abstractmethod
     def add_characteristic(self, characteristic: BleakGATTCharacteristic):
         """Add a :py:class:`~BleakGATTCharacteristic` to the service collection.
 
         Should not be used by end user, but rather by `bleak` itself.
         """
-        if characteristic.uuid not in self.__characteristics:
-            self.__characteristics[characteristic.uuid] = characteristic
-            if not isinstance(characteristic.obj, GattLocalCharacteristic):
-                self.__services[characteristic.service_uuid].add_characteristic(
-                    characteristic
-                )
-        else:
-            raise BleakError(
-                "This characteristic is already present in this BleakGATTServiceCollection!"
-            )
+        raise NotImplementedError()
 
     def get_characteristic(self, _uuid) -> BleakGATTCharacteristic:
         """Get a characteristic by UUID string"""
