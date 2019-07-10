@@ -7,22 +7,22 @@ from typing import List, Union
 # working to implement this
 
 
-from bleak.backends.service import BleakGATTService
+from bleak.exc import BleakError
+from bleak.backends.service import BleakGATTService, BleakGATTServiceCollection
 from bleak.backends.dotnet.characteristic import BleakGATTCharacteristicDotNet
 
 from bleak.backends.dotnet.utils import (
-    wrap_Task,
     wrap_IAsyncOperation,
-    IAsyncOperationAwaitable,
 )
 
-from System import Array, Byte, UInt64, Guid
-from Windows.Foundation import IAsyncOperation, TypedEventHandler
+from System import Guid
+from Windows.Foundation import IAsyncOperation 
 from Windows.Devices.Bluetooth.GenericAttributeProfile import (
     GattServiceProviderResult,
     GattServiceProvider,
     GattLocalService,
-    GattDeviceService
+    GattDeviceService,
+    GattLocalCharacteristic
 )
 
 logger = logging.getLogger(name=__name__)
@@ -43,7 +43,7 @@ class BleakGATTServiceDotNet(BleakGATTService):
         loop = loop if loop is not None else asyncio.get_event_loop()
         spr = await wrap_IAsyncOperation(IAsyncOperation[GattServiceProviderResult](
                 GattServiceProvider.CreateAsync(guid)
-                ), return_type=GattServiceProviderResult, loop = loop)
+                ), return_type=GattServiceProviderResult, loop=loop)
         newService = spr.ServiceProvider.Service
         return BleakGATTServiceDotNet(obj=newService)
     
@@ -69,3 +69,22 @@ class BleakGATTServiceDotNet(BleakGATTService):
         Should not be used by end user, but rather by `bleak` itself.
         """
         self.__characteristics.append(characteristic)
+
+class BleakGATTServiceCollectionDotNet(BleakGATTServiceCollection):
+    """Simple data container for storing the peripheral's service complement."""
+
+    def add_characteristic(self, characteristic: BleakGATTCharacteristicDotNet):
+        """Add a :py:class:`~BleakGATTCharacteristic` to the service collection.
+
+        Should not be used by end user, but rather by `bleak` itself.
+        """
+        if characteristic.uuid not in self.__characteristics:
+            self.__characteristics[characteristic.uuid] = characteristic
+            if not isinstance(characteristic.obj, GattLocalCharacteristic):
+                self.__services[characteristic.service_uuid].add_characteristic(
+                    characteristic
+                )
+        else:
+            raise BleakError(
+                "This characteristic is already present in this BleakGATTServiceCollection!"
+            )

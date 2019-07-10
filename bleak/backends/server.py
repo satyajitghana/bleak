@@ -11,7 +11,6 @@ from typing import Any
 from asyncio import AbstractEventLoop
 
 from bleak.exc import BleakError
-from bleak.backends.service import BleakGATTServiceCollection
 from bleak.backends.characteristic import GattCharacteristicsFlags
 
 class BaseBleakServer(abc.ABC):
@@ -22,7 +21,7 @@ class BaseBleakServer(abc.ABC):
     def __init__(self, loop: AbstractEventLoop = None, **kwargs):
         self.loop = loop if loop else asyncio.get_event_loop()
 
-        self.services = BleakGATTServiceCollection()
+        self.services = None 
         self.read_request_func = None
         self.write_request_func = None
 
