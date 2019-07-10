@@ -78,10 +78,10 @@ class BleakGATTServiceCollectionDotNet(BleakGATTServiceCollection):
 
         Should not be used by end user, but rather by `bleak` itself.
         """
-        if characteristic.uuid not in self.__characteristics:
-            self.__characteristics[characteristic.uuid] = characteristic
+        if characteristic.uuid not in self.characteristics:
+            self.characteristics[characteristic.uuid] = characteristic
             if not isinstance(characteristic.obj, GattLocalCharacteristic):
-                self.__services[characteristic.service_uuid].add_characteristic(
+                self.services[characteristic.service_uuid].add_characteristic(
                     characteristic
                 )
         else:
