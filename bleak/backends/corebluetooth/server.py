@@ -12,10 +12,9 @@ from Foundation import CBUUID, CBMutableService, CBMutableCharacteristic
 
 from bleak.exc import BleakError
 from bleak.backends.server import BaseBleakServer
-from bleak.backends.service import BleakGATTServiceCollection
 from bleak.backends.characteristic import GattCharacteristicsFlags
 from bleak.backends.corebluetooth import Application
-from bleak.backends.corebluetooth.service import BleakGATTServiceCoreBluetooth
+from bleak.backends.corebluetooth.service import BleakGATTServiceCoreBluetooth, BleakGATTServiceCollectionCoreBluetooth
 from bleak.backends.corebluetooth.characteristic import BleakGATTCharacteristicCoreBluetooth
 
 logger = logging.getLogger(name=__name__)
@@ -29,7 +28,7 @@ class BleakServerCoreBluetooth(BaseBleakServer):
 
         self.app = Application(client=False, loop=self.loop)
         self.name = name
-        self.services = BleakGATTServiceCollection()
+        self.services = BleakGATTServiceCollectionCoreBluetooth()
         self.read_request_func = None
         self.write_request_func = None
 
