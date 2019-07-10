@@ -5,60 +5,29 @@ Created on Mon Jul  8 11:16:27 2019 @author: by Charliealver <charliealver@gmail
 
 """
 
-import abc
 import logging
 import asyncio
-import time
 from threading import Thread, Lock, Condition
 
 from asyncio.events import AbstractEventLoop
-from functools import wraps
-from typing import Callable, Any, Union
+from typing import Union
 
-from bleak.exc import BleakError, BleakDotNetTaskError
-from bleak.backends.client import BaseBleakClient
-from bleak.backends.dotnet.discovery import discover
-from bleak.backends.dotnet.utils import (
-    wrap_Task,
-    wrap_IAsyncOperation,
-    IAsyncOperationAwaitable,
-)
-from bleak.backends.service import BleakGATTServiceCollection
-from bleak.backends.dotnet.service import BleakGATTServiceDotNet
+from bleak.backends.dotnet.utils import  wrap_IAsyncOperation
+from bleak.backends.dotnet.service import BleakGATTServiceDotNet, BleakGATTServiceCollectionDotNet
 from bleak.backends.dotnet.characteristic import BleakGATTCharacteristicDotNet
-from bleak.backends.dotnet.descriptor import BleakGATTDescriptorDotNet
 from bleak.backends.server import BaseBleakServer
 from bleak.backends.characteristic import GattCharacteristicsFlags
-
 
 # CLR imports
 # Import of Bleak CLR->UWP Bridge.
 from BleakBridge import Bridge
 
 # Import of other CLR components needed.
-from System import Array, Byte, UInt64
-from Windows.Foundation import IAsyncOperation, TypedEventHandler
-from Windows.Storage.Streams import DataReader, DataWriter, IBuffer, Buffer
-from Windows.Devices.Bluetooth import (
-    BluetoothLEDevice,
-    BluetoothConnectionStatus,
-    BluetoothCacheMode,
-    BluetoothAddressType,
-)
+from Windows.Foundation import IAsyncOperation
+from Windows.Storage.Streams import DataReader, DataWriter
+
 from Windows.Devices.Bluetooth.GenericAttributeProfile import (
-    GattDeviceService,
-    GattDeviceServicesResult,
-    GattCharacteristic,
-    GattCharacteristicsResult,
-    GattDescriptor,
-    GattDescriptorsResult,
-    GattCommunicationStatus,
-    GattReadResult,
     GattWriteOption,
-    GattWriteResult,
-    GattValueChangedEventArgs,
-    GattCharacteristicProperties,
-    GattClientCharacteristicConfigurationDescriptorValue,
     GattServiceProviderResult,
     GattServiceProvider,
     GattLocalCharacteristicResult,
@@ -76,6 +45,7 @@ from System import Guid
 
 logger = logging.getLogger(__name__)
 
+
 class Request():
     def __init__(self):
         self._lock = Lock()
@@ -90,6 +60,7 @@ class BleakServerDotNet(BaseBleakServer):
         super(BleakServerDotNet, self).__init__(loop=loop, **kwargs)
 
         self.name = name
+        self.services = BleakGATTServiceCollectionDotNet()
         self.service_provider = None
 
     async def start(self, **kwargs) -> bool:
