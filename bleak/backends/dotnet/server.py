@@ -151,11 +151,12 @@ class BleakServerDotNet(BaseBleakServer):
         self.services.add_characteristic(bleak_characteristic)
 
     # @staticmethod
-    def _read_characteristic(self,
+    async def _read_characteristic(self,
                              sender: GattLocalCharacteristic,
                              args: GattReadRequestedEventArgs):
 
         logger.debug("Reading Characteristic")
+        loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
         deferral = args.GetDeferral()
         writer = DataWriter()
         value = self.services.get_characteristic(str(sender.Uuid)).value
@@ -163,7 +164,13 @@ class BleakServerDotNet(BaseBleakServer):
         logger.debug(f"Current Characteristic value {value}")
         writer.WriteBytes(value)
         logger.debug("Getting request object {}".format(self))
-        request = self._get_request(args)
+        # request = self._get_request(args)
+        request = await wrap_IAsyncOperation(
+                        IAsyncOperation[GattReadRequest](
+                            args.GetRequestAsync()),
+                        return_type=GattReadRequest,
+                        loop=loop)
+
         logger.debug("Got request object {}".format(request))
         request.RespondWithValue(writer.DetachBuffer())
         deferral.Complete()
