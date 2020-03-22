@@ -90,7 +90,7 @@ class BleakServerDotNet(BaseBleakServer):
         """
         Determine whether there are any connected peripheral devices
         """
-        logger.debug("LOL YEAH RIGHT")
+        pass
     
     
     def is_advertising(self) -> bool:
