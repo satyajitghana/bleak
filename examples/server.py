@@ -3,6 +3,8 @@
 Example for a BLE 4.0 Server
 """
 
+import sys
+sys.path.append('.')
 import logging
 import asyncio
 
@@ -38,6 +40,7 @@ async def run(loop):
     server.write_request_func = write_request
 
     await server.start()
+    logger.debug("Advertising")
     await asyncio.sleep(40)
     await server.stop()
 
