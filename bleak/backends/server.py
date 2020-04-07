@@ -7,11 +7,14 @@ Created on 2019-07-03 by kevincar <kevincarrolldavis@gmail.com>
 
 import abc
 import asyncio
+import logging
 from typing import Any
 from asyncio import AbstractEventLoop
 
 from bleak.exc import BleakError
 from bleak.backends.characteristic import GattCharacteristicsFlags
+
+LOGGER = logging.getLogger(__name__)
 
 class BaseBleakServer(abc.ABC):
     """
