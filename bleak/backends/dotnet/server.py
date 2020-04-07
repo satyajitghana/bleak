@@ -166,7 +166,8 @@ class BleakServerDotNet(BaseBleakServer):
         logger.debug("Reading Characteristic")
         deferral = args.GetDeferral()
         writer = DataWriter()
-        value = self.services.get_characteristic(str(sender.Uuid)).value
+        # value = self.services.get_characteristic(str(sender.Uuid)).value
+        value = self.read_request(str(sender.Uuid))
         value = value if value is not None else b'\x00'
         logger.debug(f"Current Characteristic value {value}")
         writer.WriteBytes(value)
@@ -195,7 +196,8 @@ class BleakServerDotNet(BaseBleakServer):
         logger.debug("Written Value: {}".format(value))
         logger.debug("senderuuid : {}".format(
             self.services.get_characteristic(str(sender.Uuid)).value))
-        self.services.get_characteristic(str(sender.Uuid)).value = value
+        # self.services.get_characteristic(str(sender.Uuid)).value = value
+        self.write_request(str(sender.Uuid), value)
         if request.Option == GattWriteOption.WriteWithResponse:
             request.Respond()
 
