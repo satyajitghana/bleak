@@ -7,7 +7,6 @@ Created on Mon Jul  8 11:16:27 2019 @author: by Charliealver <charliealver@gmail
 
 import logging
 import asyncio
-from threading import Thread, Lock, Condition
 
 from asyncio.events import AbstractEventLoop
 from typing import Union
@@ -51,8 +50,6 @@ logger = logging.getLogger(__name__)
 
 class Request():
     def __init__(self):
-        self._lock = Lock()
-        self._cv = Condition(self._lock)
         self._obj = None
 
 
@@ -155,12 +152,13 @@ class BleakServerDotNet(BaseBleakServer):
                              sender: GattLocalCharacteristic,
                              args: GattReadRequestedEventArgs):
         """
-        This method, and the _write_characteristic method, both utilize the _get_request method.
-        The _get_request method, utilizes native thread modeling. The reason for this is that
-        the methods used to obtain the GattCharacteristics require the use of coroutines. 
-        But the service requires functions. We cannot give back coroutines, else these functions
-        will never run. Thus, we start up a thread to temporarily get or set the characteristic
-        in question.
+        This method, and the _write_characteristic method, both utilize the
+        _get_request method.  The _get_request method, utilizes native thread
+        modeling. The reason for this is that the methods used to obtain the
+        GattCharacteristics require the use of coroutines.  But the service
+        requires functions. We cannot give back coroutines, else these
+        functions will never run. Thus, we start up a thread to temporarily get
+        or set the characteristic in question.
         """
 
         logger.debug("Reading Characteristic")
@@ -202,7 +200,6 @@ class BleakServerDotNet(BaseBleakServer):
         logger.debug("Write Complete")
         deferral.Complete()
 
-
     def _get_request(self,
                      args: Union[
                          GattReadRequestedEventArgs,
@@ -210,44 +207,17 @@ class BleakServerDotNet(BaseBleakServer):
                          ]):
 
         request = Request()
-        logger.debug("Attempting to obtain request: {}".format(request._obj))
-
-        logger.debug("Starting Thread")
-        fun_thread = Thread(
-                target=self._run_request_thread, args=[args, request])
-        fun_thread.start()
-
-        logger.debug("Waiting for thread to stop")
-        request._cv.acquire()
-        while request._obj is None:
-            request._cv.wait()
-
-        request._cv.release()
-        logger.debug("Waiting for thread to join")
-        fun_thread.join()
-        logger.debug("Thread finished. Request result: {}".format(
-            request._obj))
-        return request._obj
-
-    def _run_request_thread(self,
-                            args: Union[
-                                        GattReadRequestedEventArgs,
-                                        GattWriteRequestedEventArgs
-                                        ],
-                            request: Request):
         logger.debug("THREAD: Starting threaded event loop")
         loop = asyncio.new_event_loop()
-        loop.run_until_complete(self._request_thread_loop(args, request))
+        loop.run_until_complete(self._request_loop(args, request))
         logger.debug("THREAD: Completed request loop")
+        return request._obj
 
-    async def _request_thread_loop(self,
-                                   args: Union[
-                                       GattReadRequestedEventArgs,
-                                       GattWriteRequestedEventArgs],
-                                   request: Request):
-
-        logger.debug("THREAD: Attempting to acquire the request variable")
-        request._cv.acquire()
+    async def _request_loop(self,
+                            args: Union[
+                                GattReadRequestedEventArgs,
+                                GattWriteRequestedEventArgs],
+                            request: Request):
 
         loop = asyncio.get_event_loop()
         if isinstance(args, GattReadRequestedEventArgs):
@@ -262,7 +232,3 @@ class BleakServerDotNet(BaseBleakServer):
                             args.GetRequestAsync()),
                         return_type=GattWriteRequest,
                         loop=loop)
-
-        logger.debug("THREAD: Obtained request: {}".format(request._obj))
-        request._cv.notify()
-        request._cv.release()
