@@ -119,3 +119,6 @@ class BleakGATTCharacteristicDotNet(BleakGATTCharacteristic):
     def value(self, value: bytearray):
         """Set the value for the characteristic"""
         self.__value = value
+
+    def set_value(self, value: bytearray):
+        self.__value = value
