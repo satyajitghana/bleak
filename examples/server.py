@@ -3,8 +3,6 @@
 Example for a BLE 4.0 Server
 """
 
-import sys
-sys.path.append('.')
 import logging
 import asyncio
 
