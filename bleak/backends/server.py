@@ -84,6 +84,15 @@ class BaseBleakServer(abc.ABC):
         """
         raise NotImplementedError()
 
+    @abc.abstractmethod
+    def updateValue(self, service_uuid: str, char_uuid: str) -> bool:
+        """
+        Update the characteristic value. This is different than using
+        characteristic.set_value. This send notifications to subscribed
+        central devices.
+        """
+        raise NotImplementedError()
+
     def read_request(self, uuid: str) -> bytearray:
         """
         Obtain the characteritic to read and pass on to the user-defined
