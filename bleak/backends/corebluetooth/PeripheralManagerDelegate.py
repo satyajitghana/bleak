@@ -79,7 +79,7 @@ class PeripheralManagerDelegate(NSObject):
         """Add service to the peripheral"""
         UUID = service.UUID().UUIDString()
         self._services_added_events[UUID] = asyncio.Event()
-    
+
         self.peripheral_manager.addService_(service)
 
         await self._services_added_events[UUID].wait()
@@ -93,7 +93,10 @@ class PeripheralManagerDelegate(NSObject):
         while not self._advertisement_started:
             await asyncio.sleep(0.01)
 
-        logger.debug("Advertising started with the following data: {}".format(advertisement_data))
+        logger.debug(
+            "Advertising started with the following data: {}"
+            .format(advertisement_data)
+                )
 
     async def stopAdvertising(self):
 
@@ -102,7 +105,9 @@ class PeripheralManagerDelegate(NSObject):
 
     # Protocol-specific functions
 
-    def peripheralManagerDidUpdateState_(self, peripheral: CBPeripheralManager):
+    def peripheralManagerDidUpdateState_(
+            self, peripheral: CBPeripheralManager
+            ):
         self.ready = False
         if peripheral.state() == 0:
             logger.debug("Cannot detect bluetooth device")
@@ -118,18 +123,28 @@ class PeripheralManagerDelegate(NSObject):
             logger.debug("Bluetooth powered on")
             self.ready = True
 
-
-    def peripheralManager_willRestoreState_(self, peripheral: CBPeripheralManager, d: dict):
+    def peripheralManager_willRestoreState_(
+            self, peripheral: CBPeripheralManager, d: dict
+            ):
         logger.debug("PeripheralManager restoring state: {}".format(d))
 
-    def peripheralManager_didAddService_error_(self, peripheral: CBPeripheralManager, service: CBService, error: NSError):
+    def peripheralManager_didAddService_error_(
+            self,
+            peripheral: CBPeripheralManager,
+            service: CBService,
+            error: NSError
+            ):
         UUID = service.UUID().UUIDString()
         if error:
             self._services_added_result[UUID] = False
-            raise BleakError("Failed to add service {}: {}".format(UUID, error))
+            raise BleakError("Failed to add service {}: {}"
+                             .format(UUID, error))
 
         logger.debug("Peripheral manager did add service: {}".format(UUID))
-        logger.debug("service added had characteristics: {}".format(service.characteristics()))
+        logger.debug(
+                "service added had characteristics: {}"
+                .format(service.characteristics())
+                )
         self._services_added_result[UUID] = True
         self._services_added_events[UUID].set()
 
@@ -152,7 +167,7 @@ class PeripheralManagerDelegate(NSObject):
                 logger.debug("Central Device {} is already subscribed to characteristic {}".format(central_uuid, char_uuid))
         else:
             self._central_subscriptions[central_uuid] = [char_uuid]
-    
+
     def peripheralManager_central_didUnsubscribeFromCharacteristic_(self, peripheral: CBPeripheralManager, central: CBCentral, characteristic: CBCharacteristic):
         central_uuid = central.identifier().UUIDString()
         char_uuid = characteristic.UUID().UUIDString()

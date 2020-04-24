@@ -30,17 +30,21 @@ class Application():
         self.main_loop.create_task(self._is_delegate_ready())
 
         self.nsrunloop = NSRunLoop.currentRunLoop()
-        
-        self.central_manager_delegate = CentralManagerDelegate.alloc().init() if client else None
-        self.peripheral_manager_delegate = PeripheralManagerDelegate.alloc().init() if not client else None
+
+        self.central_manager_delegate = CentralManagerDelegate.alloc().init() \
+            if client else None
+        self.peripheral_manager_delegate = PeripheralManagerDelegate.alloc()\
+            .init() if not client else None
 
     def __del__(self):
         self.ns_run_loop_done = True
 
     async def _handle_nsrunloop(self):
         while not self.ns_run_loop_done:
-            time_interval = NSDate.alloc().initWithTimeIntervalSinceNow_(self.ns_run_loop_interval)
-            self.nsrunloop.runMode_beforeDate_(NSDefaultRunLoopMode, time_interval)
+            time_interval = NSDate.alloc().initWithTimeIntervalSinceNow_(
+                    self.ns_run_loop_interval)
+            self.nsrunloop.runMode_beforeDate_(
+                    NSDefaultRunLoopMode, time_interval)
             await asyncio.sleep(0)
 
     async def _is_delegate_ready(self):
