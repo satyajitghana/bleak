@@ -100,3 +100,24 @@ class BleakServerCoreBluetooth(BaseBleakServer):
         self.services.get_service(service_uuid).add_characteristic(bleak_characteristic)
 
         self.services.add_characteristic(bleak_characteristic)
+
+    def updateValue(self, service_uuid: str, char_uuid: str) -> bool:
+        """
+        Update the characteristic value. This is different than using
+        characteristic.set_value. This send notifications to subscribed
+        central devices.
+        """
+        characteristic: BleakGATTCharacteristicCoreBluetooth = self.\
+            services.characteristics[char_uuid]
+
+        value: bytes = characteristic.value
+        value = value if value is not None else b'\x00'
+        result: bool = self.app.peripheral_manager_delegate.\
+            peripheral_manager.\
+            updateValue_forCharacteristic_onSubscribedCentrals_(
+                    value,
+                    characteristic.obj,
+                    None
+                    )
+
+        return result

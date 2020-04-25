@@ -28,7 +28,8 @@ CBPeripheralDelegate = objc.protocolNamed('CBPeripheralDelegate')
 
 
 class PeripheralDelegate(NSObject):
-    """macOS conforming python class for managing the PeripheralDelegate for BLE"""
+    """macOS conforming python class for managing the PeripheralDelegate for
+    BLE"""
     ___pyobjc_protocols__ = [CBPeripheralDelegate]
 
     def initWithPeripheral_(self, peripheral: CBPeripheral):

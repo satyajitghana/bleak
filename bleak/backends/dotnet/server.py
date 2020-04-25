@@ -40,7 +40,8 @@ from Windows.Devices.Bluetooth.GenericAttributeProfile import (
     GattReadRequestedEventArgs,
     GattReadRequest,
     GattWriteRequestedEventArgs,
-    GattWriteRequest
+    GattWriteRequest,
+    GattClientNotificationResult
 )
 
 from System import Guid
@@ -146,6 +147,20 @@ class BleakServerDotNet(BaseBleakServer):
                 bleak_characteristic)
 
         self.services.add_characteristic(bleak_characteristic)
+
+    def updateValue(self, service_uuid: str, char_uuid: str) -> bool:
+        """
+        Update the characteristic value. This is different than using
+        characteristic.set_value. This send notifications to subscribed
+        central devices.
+        """
+        characteristic: BleakGATTCharacteristicDotNet = self.services.characteristics[char_uuid.lower()]
+        value: bytes = characteristic.value
+        value = value if value is not None else b'\x00'
+        writer: DataWriter = DataWriter()
+        writer.WriteBytes(value)
+        value_buffer = writer.DetachBuffer()
+        characteristic.obj.NotifyValueAsync(value_buffer)
 
     # @staticmethod
     def _read_characteristic(self,
