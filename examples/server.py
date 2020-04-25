@@ -41,8 +41,6 @@ async def run(loop):
     logger.debug("Advertising")
     await asyncio.sleep(20)
     logger.debug("Updating")
-    char = server.services.characteristics["51FF12BB-3ED8-46E5-B4F9-D64E2FEC021B"]
-    char.set_value(b'kevin')
     server.updateValue(my_service_uuid, "51FF12BB-3ED8-46E5-B4F9-D64E2FEC021B")
     await asyncio.sleep(20)
     await server.stop()
