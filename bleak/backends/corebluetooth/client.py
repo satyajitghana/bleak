@@ -21,7 +21,10 @@ from bleak.backends.corebluetooth.characteristic import (
     BleakGATTCharacteristicCoreBluetooth
 )
 from bleak.backends.corebluetooth.descriptor import BleakGATTDescriptorCoreBluetooth
-from bleak.backends.corebluetooth.service import BleakGATTServiceCoreBluetooth
+from bleak.backends.corebluetooth.service import (
+    BleakGATTServiceCoreBluetooth,
+    BleakGATTServiceCollectionCoreBluetooth
+)
 from bleak.backends.device import BLEDevice
 from bleak.backends.service import BleakGATTServiceCollection
 from bleak.exc import BleakError
@@ -36,6 +39,7 @@ class BleakClientCoreBluetooth(BaseBleakClient):
         super(BleakClientCoreBluetooth, self).__init__(address, loop, **kwargs)
 
         self.app = Application(client=True)
+        self.services = BleakGATTServiceCollectionCoreBluetooth()
         self._device_info = None
         self._requester = None
         self._callbacks = {}
@@ -57,7 +61,7 @@ class BleakClientCoreBluetooth(BaseBleakClient):
 
         """
         await self.is_ready()
-        devices = await discover(timeout=kwargs.get("timeout", 5.0), loop=self.loop)
+        devices = await self.scan_for_devices(timeout=kwargs.get("timeout", 5.0))
 
         sought_device = list(
             filter(lambda x: x.address.upper() == self.address.upper(), devices)
