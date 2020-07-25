@@ -20,7 +20,7 @@ async def run(address, loop, debug=False):
     if debug:
         import sys
 
-        # loop.set_debug(True)
+        loop.set_debug(True)
         log.setLevel(logging.DEBUG)
         h = logging.StreamHandler(sys.stdout)
         h.setLevel(logging.DEBUG)
@@ -55,8 +55,10 @@ async def run(address, loop, debug=False):
 
 
 if __name__ == "__main__":
-    address = "24:71:89:cc:09:05" if platform.system() != "Darwin" else "243E23AE-4A99-406C-B317-18F1BD7B4CBE"
+    address = (
+        "24:71:89:cc:09:05"
+        if platform.system() != "Darwin"
+        else "243E23AE-4A99-406C-B317-18F1BD7B4CBE"
+    )
     loop = asyncio.get_event_loop()
     loop.run_until_complete(run(address, loop, True))
-
-

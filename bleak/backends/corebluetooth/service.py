@@ -5,8 +5,12 @@ from typing import List, Union
 from Foundation import CBService, CBUUID, NSStringFromClass 
 
 from bleak.exc import BleakError
-from bleak.backends.corebluetooth.characteristic import BleakGATTCharacteristicCoreBluetooth
-from bleak.backends.service import BleakGATTService, BleakGATTServiceCollection
+from bleak.backends.corebluetooth.characteristic import (
+    BleakGATTCharacteristicCoreBluetooth
+)
+from bleak.backends.service import (
+    BleakGATTService, BleakGATTServiceCollection
+)
 
 logger = logging.getLogger(name=__name__)
 
@@ -27,7 +31,9 @@ class BleakGATTServiceCoreBluetooth(BleakGATTService):
         """List of characteristics for this service"""
         return self.__characteristics
 
-    def get_characteristic(self, _uuid: CBUUID) -> Union[BleakGATTCharacteristicCoreBluetooth, None]:
+    def get_characteristic(
+        self, _uuid: CBUUID
+    ) -> Union[BleakGATTCharacteristicCoreBluetooth, None]:
         """Get a characteristic by UUID"""
         try:
             return next(filter(lambda x: x.uuid == _uuid, self.characteristics))
