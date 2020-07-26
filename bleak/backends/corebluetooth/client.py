@@ -48,7 +48,7 @@ class BleakClientCoreBluetooth(BaseBleakClient):
         super(BleakClientCoreBluetooth, self).__init__(address, loop, **kwargs)
 
         self.app = Application(client=True)
-        self.services = BleakGATTServiceCollectionCoreBluetooth()
+        self._services = BleakGATTServiceCollectionCoreBluetooth()
         self._device_info = None
         self._requester = None
         self._callbacks = {}
@@ -220,7 +220,7 @@ class BleakClientCoreBluetooth(BaseBleakClient):
                     )
 
         self._services = services
-        return self.services
+        return self._services
 
     async def read_gatt_char(self, _uuid: str, use_cached=False, **kwargs) -> bytearray:
         """Perform read operation on the specified GATT characteristic.
