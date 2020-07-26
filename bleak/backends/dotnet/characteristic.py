@@ -7,9 +7,20 @@ Created on 2019-03-19 by hbldh <henrik.blidh@nedomkull.com>
 """
 from typing import List, Union
 
+import asyncio
+
+from asyncio import AbstractEventLoop
+
+from System import Array, Byte, UInt64, Guid
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from bleak.backends.descriptor import BleakGATTDescriptor
 from bleak.backends.dotnet.descriptor import BleakGATTDescriptorDotNet
+
+from bleak.backends.dotnet.utils import (
+    wrap_Task,
+    wrap_IAsyncOperation,
+    IAsyncOperationAwaitable,
+)
 
 from Windows.Devices.Bluetooth.GenericAttributeProfile import GattCharacteristic
 
@@ -55,6 +66,7 @@ class BleakGATTCharacteristicDotNet(BleakGATTCharacteristic):
             for v in [2 ** n for n in range(10)]
             if (self.obj.CharacteristicProperties & v)
         ]
+        self.__value = None
 
     def __str__(self):
         return "{0}: {1}".format(self.uuid, self.description)
@@ -97,3 +109,16 @@ class BleakGATTCharacteristicDotNet(BleakGATTCharacteristic):
         Should not be used by end user, but rather by `bleak` itself.
         """
         self.__descriptors.append(descriptor)
+        
+    @property
+    def value(self) -> bytearray:
+        """Value of this characteristic"""
+        return self.__value
+    
+    @value.setter
+    def value(self, value: bytearray):
+        """Set the value for the characteristic"""
+        self.__value = value
+
+    def set_value(self, value: bytearray):
+        self.__value = value
