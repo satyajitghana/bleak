@@ -12,6 +12,13 @@ from asyncio import AbstractEventLoop
 
 from Foundation import NSDate, NSDefaultRunLoopMode, NSRunLoop
 from .CentralManagerDelegate import CentralManagerDelegate
+
+import objc
+
+objc.options.verbose = True
+
+# async def discover(device="hci0", timeout=5.0):
+# raise NotImplementedError("CoreBluetooth discover not implemented yet.")
 from .PeripheralManagerDelegate import PeripheralManagerDelegate
 
 
