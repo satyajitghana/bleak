@@ -19,6 +19,15 @@ my_characteristic_value = "AAAA"
 my_characteristic_data = None
 my_characteristic_permissions = 0x3
 
+
+def read_char(char, server):
+    print(char)
+
+
+def write_char(char, value, server):
+    print(char)
+
+
 async def run(loop):
     server = BleakServer(name=my_service_name, loop=loop)
     # char = BleakGATTCharacteristic.new(my_characteristic_uuid, 0x2, bytearray(my_characteristic_value.encode()), 0x1)
@@ -26,8 +35,8 @@ async def run(loop):
     # service.add_characteristic(char)
     await server.add_new_service(my_service_uuid)
     await server.add_new_characteristic(my_service_uuid, my_characteristic_uuid, my_characteristic_properties, None, my_characteristic_permissions)
-    server.read_request_func = lambda x: print(x)
-    server.write_request_func = lambda x: print(x)
+    server.read_request_func = read_char
+    server.write_request_func = write_char
     await server.start()
     await asyncio.sleep(20)
 
