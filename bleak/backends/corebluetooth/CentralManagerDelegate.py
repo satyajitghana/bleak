@@ -120,7 +120,7 @@ class CentralManagerDelegate(NSObject):
         while self.central_manager.isScanning():
             await asyncio.sleep(0.1)
 
-        return []
+        return self.peripheral_list
 
     async def connect_(self, peripheral: CBPeripheral) -> bool:
         self._connection_state = CMDConnectionState.PENDING
