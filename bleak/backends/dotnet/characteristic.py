@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Interface class for the Bleak representation of a GATT Characteristic
-
-Created on 2019-03-19 by hbldh <henrik.blidh@nedomkull.com>
-
-"""
+from uuid import UUID
 from typing import List, Union
 
 import asyncio
@@ -96,10 +91,10 @@ class BleakGATTCharacteristicDotNet(BleakGATTCharacteristic):
         """List of descriptors for this service"""
         return self.__descriptors
 
-    def get_descriptor(self, _uuid) -> Union[BleakGATTDescriptorDotNet, None]:
+    def get_descriptor(self, _uuid: Union[str, UUID]) -> Union[BleakGATTDescriptorDotNet, None]:
         """Get a descriptor by UUID"""
         try:
-            return next(filter(lambda x: x.uuid == _uuid, self.descriptors))
+            return next(filter(lambda x: x.uuid == str(_uuid), self.descriptors))
         except StopIteration:
             return None
 

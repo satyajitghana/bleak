@@ -5,10 +5,12 @@ Created on 2019-6-26 by kevincar <kevincarrolldavis@gmail.com>
 """
 
 import logging
+import uuid
 from asyncio.events import AbstractEventLoop
-from typing import Callable, Any
+from typing import Callable, Any, Union
 
 from Foundation import NSData, CBUUID
+from CoreBluetooth import CBCharacteristicWriteWithResponse, CBCharacteristicWriteWithoutResponse
 
 from bleak.backends.client import BaseBleakClient
 
@@ -44,7 +46,7 @@ class BleakClientCoreBluetooth(BaseBleakClient):
 
     """
 
-    def __init__(self, address: str, loop: AbstractEventLoop, **kwargs):
+    def __init__(self, address: str, loop: AbstractEventLoop = None, **kwargs):
         super(BleakClientCoreBluetooth, self).__init__(address, loop, **kwargs)
 
         self.app = Application(client=True)
@@ -230,7 +232,7 @@ class BleakClientCoreBluetooth(BaseBleakClient):
         # self._services = services
         return self._services
 
-    async def read_gatt_char(self, _uuid: str, use_cached=False, **kwargs) -> bytearray:
+    async def read_gatt_char(self, _uuid: Union[str, uuid.UUID], use_cached=False, **kwargs) -> bytearray:
         """Perform read operation on the specified GATT characteristic.
 
         Args:
@@ -242,8 +244,9 @@ class BleakClientCoreBluetooth(BaseBleakClient):
             (bytearray) The read data.
 
         """
-        _uuid = await self.get_appropriate_uuid(_uuid)
-        characteristic = self._services.get_characteristic(_uuid)
+        _uuid = await self.get_appropriate_uuid(str(_uuid))
+        characteristic = self.services.get_characteristic(str(_uuid))
+
         if not characteristic:
             raise BleakError("Characteristic {} was not found!".format(_uuid))
 
@@ -289,7 +292,7 @@ class BleakClientCoreBluetooth(BaseBleakClient):
         return value
 
     async def write_gatt_char(
-        self, _uuid: str, data: bytearray, response: bool = False
+        self, _uuid: Union[str, uuid.UUID], data: bytearray, response: bool = False
     ) -> None:
         """Perform a write operation of the specified GATT characteristic.
 
@@ -299,17 +302,20 @@ class BleakClientCoreBluetooth(BaseBleakClient):
             response (bool): If write-with-response operation should be done. Defaults to `False`.
 
         """
-        _uuid = await self.get_appropriate_uuid(_uuid)
-        characteristic = self._services.get_characteristic(_uuid)
+        _uuid = await self.get_appropriate_uuid(str(_uuid))
+        characteristic = self.services.get_characteristic(str(_uuid))
+
         if not characteristic:
             raise BleakError("Characteristic {} was not found!".format(_uuid))
 
         value = NSData.alloc().initWithBytes_length_(data, len(data))
-        
+
         # Follow
-        # success = await cbapp.central_manager_delegate.connected_peripheral_delegate.writeCharacteristic_value_(
-        success = await self.app.central_manager_delegate.connected_peripheral_delegate.writeCharacteristic_value_(
-            characteristic.obj, value
+        # success = await cbapp.central_manager_delegate.connected_peripheral_delegate.writeCharacteristic_value_type_(
+        success = await self.app.central_manager_delegate.connected_peripheral_delegate.writeCharacteristic_value_type_(
+            characteristic.obj,
+            value,
+            CBCharacteristicWriteWithResponse if response else CBCharacteristicWriteWithoutResponse
         )
 
         if success:
@@ -351,7 +357,7 @@ class BleakClientCoreBluetooth(BaseBleakClient):
             )
 
     async def start_notify(
-        self, _uuid: str, callback: Callable[[str, Any], Any], **kwargs
+        self, _uuid: Union[str, uuid.UUID], callback: Callable[[str, Any], Any], **kwargs
     ) -> None:
         """Activate notifications/indications on a characteristic.
 
@@ -369,10 +375,12 @@ class BleakClientCoreBluetooth(BaseBleakClient):
             callback (function): The function to be called on notification.
 
         """
-        _uuid = await self.get_appropriate_uuid(_uuid)
-        characteristic = self._services.get_characteristic(_uuid)
+
+        _uuid = await self.get_appropriate_uuid(str(_uuid))
+        characteristic = self.services.get_characteristic(str(_uuid))
+
         if not characteristic:
-            raise BleakError("Characteristic {} not found!".format(_uuid))
+            raise BleakError("Characteristic {0} not found!".format(_uuid))
 
         # Follow
         # success = await cbapp.central_manager_delegate.connected_peripheral_delegate.startNotify_cb_(
@@ -387,19 +395,17 @@ class BleakClientCoreBluetooth(BaseBleakClient):
                 )
             )
 
-    async def stop_notify(self, _uuid: str) -> None:
-        """Internal method performing call to BleakUWPBridge method.
+    async def stop_notify(self, _uuid: Union[str, uuid.UUID]) -> None:
+        """Deactivate notification/indication on a specified characteristic.
 
         Args:
-            characteristic_obj: The Managed Windows.Devices.Bluetooth.GenericAttributeProfile.GattCharacteristic Object
-            callback: The function to be called on notification.
-
-        Returns:
-            (int) The GattCommunicationStatus of the operation.
+            _uuid: The characteristic to stop notifying/indicating on.
 
         """
-        _uuid = await self.get_appropriate_uuid(_uuid)
-        characteristic = self._services.get_characteristic(_uuid)
+
+        _uuid = await self.get_appropriate_uuid(str(_uuid))
+        characteristic = self.services.get_characteristic(str(_uuid))
+
         if not characteristic:
             raise BleakError("Characteristic {} not found!".format(_uuid))
 
