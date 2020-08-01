@@ -7,7 +7,7 @@ Created on 2019-6-26 by kevincar <kevincarrolldavis@gmail.com>
 import logging
 import uuid
 from asyncio.events import AbstractEventLoop
-from typing import Callable, Any, Union
+from typing import Callable, Any, Union, List
 
 from Foundation import NSData, CBUUID
 from CoreBluetooth import CBCharacteristicWriteWithResponse, CBCharacteristicWriteWithoutResponse
@@ -52,7 +52,7 @@ class BleakClientCoreBluetooth(BaseBleakClient):
         self.app = Application(client=True)
         self._services = BleakGATTServiceCollectionCoreBluetooth()
         # loading services requires this boolean
-        self._services_result: boolean = False
+        self._services_result: bool = False
         self._device_info = None
         self._requester = None
         self._callbacks = {}
@@ -110,48 +110,50 @@ class BleakClientCoreBluetooth(BaseBleakClient):
         """Checks for current active connection"""
         return self.app.central_manager_delegate.isConnected
 
-    async def scan_for_devices(self, timeout: float = 10.0) -> [BLEDevice]:
+    async def scan_for_devices(self, timeout: float) -> List[BLEDevice]:
         """Scan for peripheral devices"""
         await self.is_ready()
-        peripherals = await self.app.central_manager_delegate.scanForPeripherals_(scan_options={'timeout': timeout}) 
+        # await self.app.central_manager_delegate.scanForPeripherals_(scan_options)
+        await self.app.central_manager_delegate.scanForPeripherals_(scan_options={'timeout': self._timeout})
 
+        # devices = cbapp.central_manager_delegate.devices
+        devices = self.app.central_manager_delegate.devices
+        return list(devices.values())
         # Follow: Client code found in discovery.py
-        found = []
-        for i, peripheral in enumerate(peripherals):
-            address = peripheral.identifier().UUIDString()
-            name = peripheral.name() or "Unknown"
-            details = peripheral
+        # found = []
+        # for i, peripheral in enumerate(peripherals):
+            # address = peripheral.identifier().UUIDString()
+            # name = peripheral.name() or "Unknown"
+            # details = peripheral
     
-            advertisement_data = self.app.central_manager_delegate.advertisement_data_list[i]
-            manufacturer_binary_data = (
-                advertisement_data['kCBAdvDataManufacturerData'] 
-                if 'kCBAdvDataManufacturerData' in advertisement_data.keys() 
-                else None
-            )
-            manufacturer_data = {}
-            if manufacturer_binary_data:
-                manufacturer_id = int.from_bytes(
-                    manufacturer_binary_data[0:2], byteorder='little'
-                )
-                manufacturer_value = ''.join(
-                    list(
-                        map(
-                            lambda x: format(x, 'x')
-                            if len(format(x, 'x')) == 2
-                            else "0{}".format(format(x, 'x')),
-                            list(manufacturer_binary_data)[2:]
-                        )
-                    )
-                )
-                manufacturer_data = {
-                        manufacturer_id: manufacturer_value
-                }
+            # advertisement_data = self.app.central_manager_delegate.advertisement_data_list[i]
+            # manufacturer_binary_data = (
+                # advertisement_data['kCBAdvDataManufacturerData'] 
+                # if 'kCBAdvDataManufacturerData' in advertisement_data.keys() 
+                # else None
+            # )
+            # manufacturer_data = {}
+            # if manufacturer_binary_data:
+                # manufacturer_id = int.from_bytes(
+                    # manufacturer_binary_data[0:2], byteorder='little'
+                # )
+                # manufacturer_value = ''.join(
+                    # list(
+                        # map(
+                            # lambda x: format(x, 'x')
+                            # if len(format(x, 'x')) == 2
+                            # else "0{}".format(format(x, 'x')),
+                            # list(manufacturer_binary_data)[2:]
+                        # )
+                    # )
+                # )
+                # manufacturer_data = {
+                        # manufacturer_id: manufacturer_value
+                # }
     
-            found.append(
-                BLEDevice(address, name, details, manufacturer_data=manufacturer_data)
-            )
-    
-        return found
+            # found.append(
+                # BLEDevice(address, name, details, manufacturer_data=manufacturer_data)
+            # )
 
     def set_disconnected_callback(
         self, callback: Callable[[BaseBleakClient], None], **kwargs
@@ -377,7 +379,7 @@ class BleakClientCoreBluetooth(BaseBleakClient):
         """
 
         _uuid = await self.get_appropriate_uuid(str(_uuid))
-        characteristic = self.services.get_characteristic(str(_uuid))
+        characteristic = self._services.get_characteristic(str(_uuid))
 
         if not characteristic:
             raise BleakError("Characteristic {0} not found!".format(_uuid))
@@ -404,7 +406,7 @@ class BleakClientCoreBluetooth(BaseBleakClient):
         """
 
         _uuid = await self.get_appropriate_uuid(str(_uuid))
-        characteristic = self.services.get_characteristic(str(_uuid))
+        characteristic = self._services.get_characteristic(str(_uuid))
 
         if not characteristic:
             raise BleakError("Characteristic {} not found!".format(_uuid))

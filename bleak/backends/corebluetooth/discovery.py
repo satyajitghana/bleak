@@ -37,17 +37,15 @@ async def discover(
     if not client.app.central_manager_delegate.enabled:
         raise BleakError("Bluetooth device is turned off")
 
-    # scan_options = {"timeout": timeout}
+    scan_options = {"timeout": timeout}
     
-    # await cbapp.central_manager_delegate.scanForPeripherals_(scan_options)
+    await client.app.central_manager_delegate.scanForPeripherals_(scan_options)
 
     # CoreBluetooth doesn't explicitly use MAC addresses to identify peripheral
     # devices because private devices may obscure their MAC addresses. To cope
     # with this, CoreBluetooth utilizes UUIDs for each peripheral. We'll use
     # this for the BLEDevice address on macOS
 
-    # Follow as of v0.6.0
     # devices = cbapp.central_manager_delegate.devices
-    # return list(devices.values())
-
-    return await client.scan_for_devices(timeout=timeout)
+    devices = client.app.central_manager_delegate.devices
+    return list(devices.values())

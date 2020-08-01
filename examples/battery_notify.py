@@ -13,7 +13,7 @@ async def run(address, loop):
         print("Sender: {} set new value {}".format(sender, battery_level))
         change = 1  # noqa
 
-    async with BleakClient(address, loop=loop) as client:
+    async with BleakClient(address, loop=loop, timeout=5.0) as client:
         await client.start_notify(BATTERY_LEVEL_UUID, battery_change)
         print("Awating battery level change")
 
