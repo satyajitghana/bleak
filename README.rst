@@ -41,12 +41,27 @@ Installation
 
     $ pip install bleak
 
+If you are using the latest Github package in `server` branch, that includes the BleakServer, please use
+
+```
+pip install -r requirements_dev.txt
+pip install .
+```
+
+try to import the bleak server, if you are having issues install the missing dependencies.
+
 Features
 --------
 
 * Supports Windows 10, version 16299 (Fall Creators Update) or greater
 * Supports Linux distributions with BlueZ >= 5.43
 * Plans on macOS support via Core Bluetooth API (see `develop` branch for progress)
+
+
+Addtional Features (only available if you install using this repository in the `server` branch)
+
+* BleakServer (macOS and Windows)
+* see example (examples/server_json.py)
 
 Bleak supports reading, writing and getting notifications from
 GATT servers, as well as a function for discovering BLE devices.

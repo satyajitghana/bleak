@@ -1,0 +1,67 @@
+[{
+        "guid": "f3e6b4d9-92f7-4b85-b71f-814df5214603",
+        "isActive": true,
+        "balance": "$1,959.49",
+        "age": 26,
+        "eyeColor": "blue",
+        "name": "Lott Russell",
+        "gender": "male",
+        "company": "GINK",
+        "email": "lottrussell@gink.com"
+    },
+    {
+        "guid": "c8981997-6f86-4b1c-afde-cc7f034b8cff",
+        "isActive": false,
+        "balance": "$2,776.88",
+        "age": 20,
+        "eyeColor": "brown",
+        "name": "Olson Schroeder",
+        "gender": "male",
+        "company": "XLEEN",
+        "email": "olsonschroeder@xleen.com"
+    },
+    {
+        "guid": "caa705df-92bc-43de-9019-84055d7b88d9",
+        "isActive": true,
+        "balance": "$2,359.16",
+        "age": 23,
+        "eyeColor": "brown",
+        "name": "Franco Schwartz",
+        "gender": "male",
+        "company": "REVERSUS",
+        "email": "francoschwartz@reversus.com"
+    },
+    {
+        "guid": "fd5cd5aa-43ce-41d5-ba1f-5734a0455d5a",
+        "isActive": true,
+        "balance": "$1,472.31",
+        "age": 33,
+        "eyeColor": "blue",
+        "name": "Marina Flowers",
+        "gender": "female",
+        "company": "UNCORP",
+        "email": "marinaflowers@uncorp.com"
+    },
+    {
+        "guid": "207b3895-26f3-4b2a-b206-08b7ae388030",
+        "isActive": true,
+        "balance": "$3,930.87",
+        "age": 40,
+        "eyeColor": "brown",
+        "name": "Byers Burgess",
+        "gender": "male",
+        "company": "IMPERIUM",
+        "email": "byersburgess@imperium.com"
+    },
+    {
+        "guid": "87280f5f-a3ce-493b-879c-3553f4ed53be",
+        "isActive": true,
+        "balance": "$2,437.65",
+        "age": 37,
+        "eyeColor": "brown",
+        "name": "Gina Park",
+        "gender": "female",
+        "company": "KNEEDLES",
+        "email": "ginapark@kneedles.com"
+    }
+]

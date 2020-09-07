@@ -29,7 +29,7 @@ async def run(loop):
     server.read_request_func = lambda x: print(x)
     server.write_request_func = lambda x: print(x)
     await server.start()
-    await asyncio.sleep(20)
+    await asyncio.sleep(100)
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(run(loop))
